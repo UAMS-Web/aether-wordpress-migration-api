@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Content\OptionsPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\OptionsPayload;
 
 /*
  * The endpoint and `scripts/audit-option-denylist.php` both call this, which is

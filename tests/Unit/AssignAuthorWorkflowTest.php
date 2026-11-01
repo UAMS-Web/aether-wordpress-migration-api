@@ -35,7 +35,7 @@ const ASSIGN_AUTHOR_PR = '4242';
 /**
  * Repository every behavior case uses.
  */
-const ASSIGN_AUTHOR_REPO = 'UAMS-Web/uamswp-migration-api';
+const ASSIGN_AUTHOR_REPO = 'UAMS-Web/aether-wordpress-migration-api';
 
 /**
  * SHA-256 of the workflow from its `on:` line to the end.
@@ -562,5 +562,5 @@ it('asks for the first page of closing references by owner, name and integer num
     expect($run['calls'][0] ?? '')
         ->toContain('query($owner: String!, $name: String!, $number: Int!)')
         ->toContain('pullRequest(number: $number) { closingIssuesReferences(first: 100) { totalCount nodes { number repository { nameWithOwner } } } }')
-        ->toContain('-F owner=UAMS-Web -F name=uamswp-migration-api -F number=4242');
+        ->toContain('-F owner=UAMS-Web -F name=aether-wordpress-migration-api -F number=4242');
 })->skip(fn (): bool => assignAuthorToolsMissing() !== null, 'needs bash and jq');

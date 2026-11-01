@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Site;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Site;
 
 /**
  * Dispatch any route in this namespace as a super admin, optionally scoped.

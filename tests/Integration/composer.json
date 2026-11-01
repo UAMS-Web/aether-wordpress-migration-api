@@ -1,5 +1,5 @@
 {
-    "name": "uams-web/uamswp-migration-api-integration-tests",
+    "name": "uams-web/aether-wordpress-migration-api-integration-tests",
     "description": "The Integration suite's own Composer setup. WordPress' test bootstrap requires yoast/phpunit-polyfills, which supports PHPUnit 12 at most, and the root runs Pest 5 on PHPUnit 13 (#375).",
     "license": "GPL-2.0-or-later",
     "require-dev": {
@@ -15,8 +15,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "UAMSWP\\MigrationAPI\\": "../../includes/",
-            "UAMSWP\\MigrationAPI\\Tests\\": "../"
+            "UAMSWeb\\Aether\\WordPressImporter\\MigrationApi\\": "../../includes/",
+            "UAMSWeb\\Aether\\WordPressImporter\\MigrationApi\\Tests\\": "../"
         },
         "exclude-from-classmap": [
             "../Support/phpunit-removed-classes.php"

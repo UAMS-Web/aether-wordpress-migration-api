@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Content\AttachmentFiles;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\AttachmentFiles;
 
 /*
  * The consumer resolves an embedded image by its `src`, because the

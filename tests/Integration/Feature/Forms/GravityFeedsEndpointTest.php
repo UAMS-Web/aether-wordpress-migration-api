@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Content\GravityFeedPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\GravityFeedPayload;
 
 /*
  * What these tests hold, and why the endpoint exists at all: a feed is the only

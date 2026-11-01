@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\Tests\Support;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\Tests\Support;
 
-use UAMSWP\MigrationAPI\Config;
-use UAMSWP\MigrationAPI\Site;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Site;
 use WP_REST_Server;
 use WP_UnitTest_Factory;
 use WP_UnitTestCase;

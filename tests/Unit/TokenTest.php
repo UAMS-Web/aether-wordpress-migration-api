@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Token;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Token;
 
 /*
  * The token's pure core: hashing, the rotation overlap, and what authenticates

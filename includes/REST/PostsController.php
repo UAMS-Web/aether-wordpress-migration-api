@@ -6,15 +6,15 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\REST;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\REST;
 
 use DateTimeImmutable;
 use DateTimeZone;
 use Throwable;
-use UAMSWP\MigrationAPI\Config;
-use UAMSWP\MigrationAPI\Content\AttachmentFiles;
-use UAMSWP\MigrationAPI\Content\PostPayload;
-use UAMSWP\MigrationAPI\Pagination;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\AttachmentFiles;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\PostPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Pagination;
 use WP_Error;
 use WP_Post;
 use WP_Query;

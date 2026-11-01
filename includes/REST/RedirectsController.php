@@ -6,13 +6,13 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\REST;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\REST;
 
 use PrettyLinks\Repositories\Links;
 use Red_Group;
 use Red_Item;
 use Red_Options;
-use UAMSWP\MigrationAPI\Pagination;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Pagination;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;

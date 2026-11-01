@@ -6,8 +6,8 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Config;
-use UAMSWP\MigrationAPI\Tests\Support\WakeupProbe;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Tests\Support\WakeupProbe;
 
 /*
  * Zero of 259 captured WXR exports contain a `<wp:option>` element, so every

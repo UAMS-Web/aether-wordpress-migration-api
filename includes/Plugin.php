@@ -6,18 +6,18 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi;
 
-use UAMSWP\MigrationAPI\Admin\TokenPage;
-use UAMSWP\MigrationAPI\REST\AuthorsController;
-use UAMSWP\MigrationAPI\REST\Controller;
-use UAMSWP\MigrationAPI\REST\DiscoveryController;
-use UAMSWP\MigrationAPI\REST\FormsController;
-use UAMSWP\MigrationAPI\REST\IndexController;
-use UAMSWP\MigrationAPI\REST\OptionsController;
-use UAMSWP\MigrationAPI\REST\PostsController;
-use UAMSWP\MigrationAPI\REST\RedirectsController;
-use UAMSWP\MigrationAPI\REST\TermsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Admin\TokenPage;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\AuthorsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\Controller;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\DiscoveryController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\FormsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\IndexController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\OptionsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\PostsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\RedirectsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\TermsController;
 
 /**
  * Wires the plugin into WordPress.

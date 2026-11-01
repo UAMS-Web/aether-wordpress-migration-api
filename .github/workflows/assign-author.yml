@@ -6,7 +6,7 @@ name: Assign author
 # the issues closed by a merged pull request had no assignee or somebody else's.
 #
 # This header is the only part that differs between the copies in
-# `uams-statamic`, `wordpress-importer` and `uamswp-migration-api`. Keep the
+# `uams-statamic`, `wordpress-importer` and `aether-wordpress-migration-api`. Keep the
 # rest identical, and change it in all three at once.
 #
 # - `opened` assigns the pull request itself.

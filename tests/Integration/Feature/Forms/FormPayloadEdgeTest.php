@@ -6,9 +6,9 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Content\FormidablePayload;
-use UAMSWP\MigrationAPI\Content\GravityFeedPayload;
-use UAMSWP\MigrationAPI\Content\NinjaPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\FormidablePayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\GravityFeedPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\NinjaPayload;
 
 /*
  * Pins the guards in `FormidablePayload`, `GravityFeedPayload` and

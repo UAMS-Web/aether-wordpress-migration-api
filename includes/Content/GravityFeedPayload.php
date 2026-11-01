@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\Content;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\Content;
 
 /**
  * One Gravity Forms add-on feed, with its meta filtered for credentials.

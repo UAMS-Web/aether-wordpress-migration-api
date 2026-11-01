@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi;
 
 use WP_Error;
 use WP_REST_Request;

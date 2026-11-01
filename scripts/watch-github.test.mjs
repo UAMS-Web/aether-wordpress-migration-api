@@ -76,7 +76,7 @@ function pull({ number = 1, title = 'A change', draft = false, sha = 'a'.repeat(
         number,
         title,
         draft,
-        html_url: `https://github.com/UAMS-Web/uamswp-migration-api/pull/${number}`,
+        html_url: `https://github.com/UAMS-Web/aether-wordpress-migration-api/pull/${number}`,
         body,
         head: { sha },
         assignees: assignees.map((login) => ({ login })),
@@ -117,7 +117,7 @@ describe('parseArgs', () => {
     it('defaults to this repository and a 60s interval', () => {
         const options = parseArgs([]);
 
-        assert.deepEqual(options.repos, ['UAMS-Web/uamswp-migration-api']);
+        assert.deepEqual(options.repos, ['UAMS-Web/aether-wordpress-migration-api']);
         assert.equal(options.interval, 60);
         assert.equal(options.emitExisting, false);
     });
@@ -379,7 +379,7 @@ describe('the comment sweep at poll time', () => {
     const comment = ({ number = 5, id = 900, body = '', kind = 'issues' } = {}) => ({
         id,
         body,
-        html_url: `https://github.com/UAMS-Web/uamswp-migration-api/${kind}/${number}#issuecomment-${id}`,
+        html_url: `https://github.com/UAMS-Web/aether-wordpress-migration-api/${kind}/${number}#issuecomment-${id}`,
     });
 
     it('seeds silently, so a comment older than the watcher is never reported', async () => {

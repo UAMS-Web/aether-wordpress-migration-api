@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Token;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Token;
 
 /*
  * Pins the refusal when `UAMSWP_MIGRATION_API_SECRET` is defined as `''` (#363).

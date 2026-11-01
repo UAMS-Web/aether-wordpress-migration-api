@@ -6,13 +6,13 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\REST;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\REST;
 
-use UAMSWP\MigrationAPI\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
 use WP_REST_Request;
 use WP_REST_Response;
 
-use const UAMSWP\MigrationAPI\VERSION;
+use const UAMSWeb\Aether\WordPressImporter\MigrationApi\VERSION;
 
 /**
  * `GET /` — the namespace index.

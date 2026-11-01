@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\Tests\Support;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\Tests\Support;
 
 /**
  * A class that records having been woken.

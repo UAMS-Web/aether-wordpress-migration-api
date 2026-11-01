@@ -60,8 +60,8 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Config;
-use UAMSWP\MigrationAPI\Content\OptionsPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\OptionsPayload;
 
 $root = rtrim($argv[1] ?? \dirname(__DIR__, 4), '/');
 

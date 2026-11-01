@@ -77,7 +77,7 @@ const execFileAsync = promisify(execFile);
 let execGh = execFileAsync;
 
 /** The repository this watcher exists for. A single repo, unlike the sibling this is ported from. */
-const DEFAULT_REPOS = ['UAMS-Web/uamswp-migration-api'];
+const DEFAULT_REPOS = ['UAMS-Web/aether-wordpress-migration-api'];
 
 /** Consecutive per-repo poll failures tolerated before the failure is surfaced as an event. */
 const FAILURE_STREAK_BEFORE_ALERT = 3;
@@ -110,7 +110,7 @@ let stopping = false;
 const HELP = `watch-github.mjs — emit one line per pull-request lifecycle event
 
   --interval <seconds>   poll interval, minimum 10 (default 60)
-  --repos <a,b>          repositories to watch (default UAMS-Web/uamswp-migration-api)
+  --repos <a,b>          repositories to watch (default UAMS-Web/aether-wordpress-migration-api)
   --emit-existing        announce already-open pull requests on the first poll
   --once                 seed and exit, without entering the poll loop
   --help                 this text

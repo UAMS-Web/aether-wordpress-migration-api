@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Admin\TokenPage;
-use UAMSWP\MigrationAPI\Auth;
-use UAMSWP\MigrationAPI\Site;
-use UAMSWP\MigrationAPI\Token;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Admin\TokenPage;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Auth;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Site;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Token;
 
 /*
  * Every `! is_multisite()` branch in `includes/` runs here, in the process

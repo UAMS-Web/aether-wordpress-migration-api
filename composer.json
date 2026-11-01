@@ -1,5 +1,5 @@
 {
-    "name": "uams-web/uamswp-migration-api",
+    "name": "uams-web/aether-wordpress-migration-api",
     "description": "Read-only migration API serving raw, current WordPress content to the Statamic importer.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
@@ -20,12 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "UAMSWP\\MigrationAPI\\": "includes/"
+            "UAMSWeb\\Aether\\WordPressImporter\\MigrationApi\\": "includes/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "UAMSWP\\MigrationAPI\\Tests\\": "tests/"
+            "UAMSWeb\\Aether\\WordPressImporter\\MigrationApi\\Tests\\": "tests/"
         },
         "exclude-from-classmap": [
             "tests/Support/phpunit-removed-classes.php",

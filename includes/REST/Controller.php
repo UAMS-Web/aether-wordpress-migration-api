@@ -6,14 +6,14 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\REST;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\REST;
 
-use UAMSWP\MigrationAPI\Auth;
-use UAMSWP\MigrationAPI\Site;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Auth;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Site;
 use WP_Error;
 use WP_REST_Request;
 
-use const UAMSWP\MigrationAPI\REST_NAMESPACE;
+use const UAMSWeb\Aether\WordPressImporter\MigrationApi\REST_NAMESPACE;
 
 /**
  * Shared plumbing for every controller in this namespace.

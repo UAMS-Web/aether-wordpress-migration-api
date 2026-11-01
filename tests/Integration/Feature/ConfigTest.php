@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
 
 /*
  * The design rule under test: adding a post type or taxonomy to the API is a

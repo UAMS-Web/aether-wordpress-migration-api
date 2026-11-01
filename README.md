@@ -1,4 +1,4 @@
-# uamswp-migration-api
+# aether-wordpress-migration-api
 
 Read-only migration API for the UAMS WordPress network. Serves raw, current content to the [Statamic importer](https://github.com/UAMS-Web/wordpress-importer) in place of hand-made WordPress XML (WXR) exports and plugin export files.
 
@@ -148,3 +148,13 @@ The same jobs run on GitHub Actions on every pull request, and `main` requires t
 ## Temporary by design
 
 This plugin exists for the WordPress → Statamic migration. When that completes it is deactivated and deleted — one plugin removed, rather than dead code unpicked from `UAMSWP-Find-a-Doc`.
+
+## Renamed to `aether-wordpress-migration-api`
+
+The repository is `UAMS-Web/aether-wordpress-migration-api`, and the old `UAMS-Web/uamswp-migration-api` address redirects to it for the web, `git` and the API. Composer does not redirect a package name, so a consumer changes what it names:
+
+- **Composer package:** `uams-web/uamswp-migration-api` becomes `uams-web/aether-wordpress-migration-api`.
+- **PHP namespace:** `UAMSWP\MigrationAPI` becomes `UAMSWeb\Aether\WordPressImporter\MigrationApi`, mapped to `includes/` by `autoload.psr-4`.
+- **Unchanged:** the plugin file and folder name `uamswp-migration-api`, the text domain, the REST namespace `uamswp-migration/v1`, the `UAMSWP_MIGRATION_API_*` constants and the settings page slug. A WordPress install keys an active plugin by its folder and main file, so those stay.
+- **A checkout** points at the new address with `git remote set-url origin https://github.com/UAMS-Web/aether-wordpress-migration-api.git`.
+- **A site deployed with WP Pusher** keeps pointing at the old repository name, which GitHub redirects, and keeps its plugin folder. After the first release under the new name, check that one site updates in place.

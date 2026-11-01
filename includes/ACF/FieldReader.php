@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\ACF;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\ACF;
 
 /**
  * The plugin's only route to ACF.

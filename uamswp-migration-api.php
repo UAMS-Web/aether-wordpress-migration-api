@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name:       UAMSWP Migration API
- * Plugin URI:        https://github.com/UAMS-Web/uamswp-migration-api
+ * Plugin URI:        https://github.com/UAMS-Web/aether-wordpress-migration-api
  * Description:       Read-only migration API serving raw, current WordPress content to the Statamic importer. Temporary — remove when the migration completes.
  * Version:           0.7.4
  * Requires at least: 6.4
@@ -17,7 +17,7 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi;
 
 // No direct access.
 if (! \defined('ABSPATH')) {

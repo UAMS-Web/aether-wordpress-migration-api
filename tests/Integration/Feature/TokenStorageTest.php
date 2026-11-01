@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Token;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Token;
 
 /*
  * The pure core — hashing, the overlap window, what authenticates when — is

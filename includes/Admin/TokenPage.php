@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\Admin;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\Admin;
 
-use UAMSWP\MigrationAPI\Auth;
-use UAMSWP\MigrationAPI\Token;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Auth;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Token;
 
 /**
  * The page an operator uses to issue and rotate this network's API token.

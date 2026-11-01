@@ -74,7 +74,7 @@ if ($argv[2] === 'native') {
     }
 }
 
-$method = new ReflectionMethod(UAMSWP\MigrationAPI\ACF\FieldReader::class, 'storedMetadata');
+$method = new ReflectionMethod(UAMSWeb\Aether\WordPressImporter\MigrationApi\ACF\FieldReader::class, 'storedMetadata');
 
 $results = [];
 

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
 
 /*
  * These replace WXR's channel header and the importer's

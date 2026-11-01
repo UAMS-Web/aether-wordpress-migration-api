@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Content\AttachmentFiles;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\AttachmentFiles;
 
 /*
  * The pure half of the file lookup: which stored names a path could belong to,

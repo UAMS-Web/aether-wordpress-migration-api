@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\ACF\FieldReader;
-use UAMSWP\MigrationAPI\Config;
-use UAMSWP\MigrationAPI\Content\DiscoveryPayload;
-use UAMSWP\MigrationAPI\Content\OptionsPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\ACF\FieldReader;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\DiscoveryPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\OptionsPayload;
 
 /*
  * Pins the branches of `OptionsPayload`, `DiscoveryPayload`, `FieldReader` and

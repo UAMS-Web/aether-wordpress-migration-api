@@ -17,7 +17,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\Assert;
-use UAMSWP\MigrationAPI\Tests\Support\WordPressTestCase;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Tests\Support\WordPressTestCase;
 
 /**
  * Create a user with the given role.

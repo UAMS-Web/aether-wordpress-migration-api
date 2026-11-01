@@ -6,8 +6,8 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Auth;
-use UAMSWP\MigrationAPI\Token;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Auth;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Token;
 
 /**
  * Put a request's route and credential where the filter reads them.

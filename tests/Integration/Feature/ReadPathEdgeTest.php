@@ -6,13 +6,13 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Config;
-use UAMSWP\MigrationAPI\Content\AttachmentFiles;
-use UAMSWP\MigrationAPI\Content\PostPayload;
-use UAMSWP\MigrationAPI\Content\TermPayload;
-use UAMSWP\MigrationAPI\REST\AuthorsController;
-use UAMSWP\MigrationAPI\REST\PostsController;
-use UAMSWP\MigrationAPI\REST\RedirectsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\AttachmentFiles;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\PostPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\TermPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\AuthorsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\PostsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\RedirectsController;
 
 /*
  * Pins the branches of the post, term, author and redirect routes, and of the

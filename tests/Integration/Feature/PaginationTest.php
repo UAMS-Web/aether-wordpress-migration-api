@@ -6,8 +6,8 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Config;
-use UAMSWP\MigrationAPI\Pagination;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Pagination;
 
 /**
  * Build pagination from a request carrying the given parameters.

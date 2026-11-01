@@ -383,7 +383,7 @@ tests_add_filter(
          * carried ACF PRO 6.2.9, `acf_get_metadata_by_field()` is `@since 6.4`, and
          * `FieldReader::isStoredRatherThanSupplied()` called a function that did not
          * exist. The failure arrived as 24 tests dying on
-         * `Call to undefined function UAMSWP\MigrationAPI\ACF\acf_get_metadata_by_field()`
+         * `Call to undefined function UAMSWeb\Aether\WordPressImporter\MigrationApi\ACF\acf_get_metadata_by_field()`
          * — PHP's namespace-fallback message, which names neither ACF nor a version
          * and reads like a bootstrap ordering fault.
          *

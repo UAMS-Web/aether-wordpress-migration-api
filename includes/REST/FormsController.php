@@ -6,15 +6,15 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\REST;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\REST;
 
 use FrmForm;
 use GFAPI;
 use stdClass;
-use UAMSWP\MigrationAPI\Content\FormidablePayload;
-use UAMSWP\MigrationAPI\Content\GravityFeedPayload;
-use UAMSWP\MigrationAPI\Content\NinjaPayload;
-use UAMSWP\MigrationAPI\Pagination;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\FormidablePayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\GravityFeedPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\NinjaPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Pagination;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
