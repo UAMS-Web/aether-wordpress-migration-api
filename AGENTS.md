@@ -1,4 +1,4 @@
-# uamswp-migration-api
+# aether-wordpress-migration-api
 
 A read-only WordPress plugin that serves raw, current content to the Statamic importer. It is the migration's data source, replacing hand-made WXR exports and plugin export files.
 

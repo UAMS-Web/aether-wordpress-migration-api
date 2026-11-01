@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\Content;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\Content;
 
 use WP_User;
 

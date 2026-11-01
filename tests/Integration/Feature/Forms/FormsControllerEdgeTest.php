@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\REST\FormsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\FormsController;
 
 /*
  * Pins the branches of `FormsController` that need an input the endpoint tests

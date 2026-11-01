@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
 
 /*
  * D-034 established that post-type and taxonomy registration is process-global:

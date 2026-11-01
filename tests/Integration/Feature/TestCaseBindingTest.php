@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Tests\Support\WordPressTestCase;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Tests\Support\WordPressTestCase;
 
 /*
  * Passes in every ordinary run. Its job is to fail in a child process started

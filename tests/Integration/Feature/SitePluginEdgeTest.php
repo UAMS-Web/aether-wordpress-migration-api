@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Auth;
-use UAMSWP\MigrationAPI\Plugin;
-use UAMSWP\MigrationAPI\REST\IndexController;
-use UAMSWP\MigrationAPI\Site;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Auth;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Plugin;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\IndexController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Site;
 
 /*
  * Pins the branches of `Site` and `Plugin` that the endpoint tests never reach

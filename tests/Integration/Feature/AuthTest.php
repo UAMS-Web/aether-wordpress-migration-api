@@ -6,9 +6,9 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Auth;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Auth;
 
-use const UAMSWP\MigrationAPI\REST_NAMESPACE;
+use const UAMSWeb\Aether\WordPressImporter\MigrationApi\REST_NAMESPACE;
 
 /*
  * Every test here dispatches. Calling a controller method directly would prove

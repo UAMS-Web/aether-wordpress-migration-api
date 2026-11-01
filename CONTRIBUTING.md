@@ -1,4 +1,4 @@
-# Contributing to uamswp-migration-api
+# Contributing to aether-wordpress-migration-api
 
 <!-- uams-claude-skills:begin -->
 ## Branches and environments

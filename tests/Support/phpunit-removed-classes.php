@@ -18,7 +18,7 @@
  * colliding.
  *
  * `composer.json` excludes this file from the classmap. It declares `PHPUnit\*`
- * classes inside a directory mapped to `UAMSWP\MigrationAPI\Tests\`, which is a
+ * classes inside a directory mapped to `UAMSWeb\Aether\WordPressImporter\MigrationApi\Tests\`, which is a
  * PSR-4 violation by construction — without the exclusion,
  * `composer dump-autoload --strict-psr` fails. It is required explicitly by
  * `tests/Integration/bootstrap.php`, so it never needed autoloading.

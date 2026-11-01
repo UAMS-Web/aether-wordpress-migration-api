@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Generate a GitHub Release body for UAMS-Web/uamswp-migration-api, per the
+// Generate a GitHub Release body for UAMS-Web/aether-wordpress-migration-api, per the
 // `writing-release-notes` skill (.claude/skills/writing-release-notes/SKILL.md).
 //
 // Ported from UAMS-Web/wordpress-importer's gen_release_notes.py (#309), and
@@ -14,7 +14,7 @@
 // `gh` and Node, and nothing from npm.
 //
 //   node scripts/gen-release-notes.mjs v0.2.0 main \
-//       --repo UAMS-Web/uamswp-migration-api \
+//       --repo UAMS-Web/aether-wordpress-migration-api \
 //       --lead "One-sentence milestone theme." \
 //       --verification "npm run ci:local green on <sha>, all nine jobs." \
 //       > notes.md
@@ -105,7 +105,7 @@ export function parseArgs(argv) {
     }
 
     if (!opts.repo) {
-        return { error: '--repo is required, e.g. --repo UAMS-Web/uamswp-migration-api. There is no default: a wrong one links every bullet to another repository\'s pull requests without any error.' }
+        return { error: '--repo is required, e.g. --repo UAMS-Web/aether-wordpress-migration-api. There is no default: a wrong one links every bullet to another repository\'s pull requests without any error.' }
     }
 
     if (!/^[\w.-]+\/[\w.-]+$/.test(opts.repo)) {

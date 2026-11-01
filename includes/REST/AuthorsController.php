@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\REST;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\REST;
 
-use UAMSWP\MigrationAPI\Content\AuthorPayload;
-use UAMSWP\MigrationAPI\Pagination;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Content\AuthorPayload;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Pagination;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_User;

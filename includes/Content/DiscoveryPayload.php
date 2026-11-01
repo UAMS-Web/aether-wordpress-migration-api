@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\Content;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\Content;
 
-use UAMSWP\MigrationAPI\Config;
-use UAMSWP\MigrationAPI\REST\RedirectsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\RedirectsController;
 use WP_Site;
 
 /**

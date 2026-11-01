@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\ACF\FieldReader;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\ACF\FieldReader;
 
 /*
  * The pre-6.4 fallback behind `FieldReader::storedMetadata()` (#22, D-069,

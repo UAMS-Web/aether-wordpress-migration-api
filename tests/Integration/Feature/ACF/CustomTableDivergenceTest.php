@@ -37,7 +37,7 @@ use ACFCustomDatabaseTables\Coordinator\TableCoordinator;
 use ACFCustomDatabaseTables\Coordinator\TableCreationCoordinator;
 use ACFCustomDatabaseTables\Core;
 use ACFCustomDatabaseTables\Data\TableMap;
-use UAMSWP\MigrationAPI\ACF\FieldReader;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\ACF\FieldReader;
 
 /**
  * Build the table from the fixture and hydrate the runtime map.

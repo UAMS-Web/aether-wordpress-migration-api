@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-namespace UAMSWP\MigrationAPI\Content;
+namespace UAMSWeb\Aether\WordPressImporter\MigrationApi\Content;
 
-use UAMSWP\MigrationAPI\ACF\FieldReader;
-use UAMSWP\MigrationAPI\Config;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\ACF\FieldReader;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
 use WP_Post;
 
 /**

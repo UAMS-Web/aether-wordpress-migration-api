@@ -23,7 +23,7 @@ import {
     subjectPull,
 } from './gen-release-notes.mjs'
 
-const REPO = 'UAMS-Web/uamswp-migration-api'
+const REPO = 'UAMS-Web/aether-wordpress-migration-api'
 
 /** A stream stand-in that keeps what is written. */
 function sink() {

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\REST\RedirectsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\RedirectsController;
 
 /*
  * Pins the `uamswp_migration_api_redirect_plugin_not_loaded` 404 on both

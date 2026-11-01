@@ -10,7 +10,7 @@ use PrettyLinks\Bootstrap;
 use PrettyLinks\Database\Migrator;
 use PrettyLinks\Repositories\Links;
 use Redirection\Database\Schema\Latest;
-use UAMSWP\MigrationAPI\REST\RedirectsController;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\REST\RedirectsController;
 
 /**
  * Dispatch a GET against a redirects route, authenticated.

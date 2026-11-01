@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-use UAMSWP\MigrationAPI\Tests\Support\WordPressTestCase;
+use UAMSWeb\Aether\WordPressImporter\MigrationApi\Tests\Support\WordPressTestCase;
 
 /*
  * WordPress has to be up before the `uses()` below, because resolving
