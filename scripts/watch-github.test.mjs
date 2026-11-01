@@ -185,8 +185,8 @@ describe('seeding', () => {
         });
 
         assert.equal(emitted.length, 2);
-        assert.match(emitted[0], /^READY {2}uamswp-migration-api#7 {2}already open, ready/);
-        assert.match(emitted[1], /^DRAFT {2}uamswp-migration-api#8 {2}already open, draft/);
+        assert.match(emitted[0], /^READY {2}aether-wordpress-migration-api#7 {2}already open, ready/);
+        assert.match(emitted[1], /^DRAFT {2}aether-wordpress-migration-api#8 {2}already open, draft/);
     });
 });
 
@@ -200,8 +200,8 @@ describe('the event matrix', () => {
         ]);
 
         assert.equal(events.length, 2);
-        assert.match(events[0], /^READY {2}uamswp-migration-api#3 {2}opened ready {2}A change {2}https:/);
-        assert.match(events[1], /^DRAFT {2}uamswp-migration-api#4 {2}opened draft/);
+        assert.match(events[0], /^READY {2}aether-wordpress-migration-api#3 {2}opened ready {2}A change {2}https:/);
+        assert.match(events[1], /^DRAFT {2}aether-wordpress-migration-api#4 {2}opened draft/);
     });
 
     it('reports draft -> ready', async () => {
@@ -213,7 +213,7 @@ describe('the event matrix', () => {
         ]);
 
         assert.equal(events.length, 1);
-        assert.match(events[0], /^READY {2}uamswp-migration-api#5 {2}draft -> ready/);
+        assert.match(events[0], /^READY {2}aether-wordpress-migration-api#5 {2}draft -> ready/);
     });
 
     it('reports ready -> draft', async () => {
@@ -225,7 +225,7 @@ describe('the event matrix', () => {
         ]);
 
         assert.equal(events.length, 1);
-        assert.match(events[0], /^DRAFT {2}uamswp-migration-api#5 {2}ready -> draft/);
+        assert.match(events[0], /^DRAFT {2}aether-wordpress-migration-api#5 {2}ready -> draft/);
     });
 
     it('reports a push to an open ready pull request, naming the new head', async () => {
@@ -237,7 +237,7 @@ describe('the event matrix', () => {
         ]);
 
         assert.equal(events.length, 1);
-        assert.match(events[0], /^PUSH {2}uamswp-migration-api#6 {2}pushed bbbbbbbbb {2}/);
+        assert.match(events[0], /^PUSH {2}aether-wordpress-migration-api#6 {2}pushed bbbbbbbbb {2}/);
     });
 
     it('emits nothing when a ready pull request is unchanged', async () => {
@@ -278,7 +278,7 @@ describe('the event matrix', () => {
         );
 
         assert.equal(events.length, 1);
-        assert.match(events[0], /^GONE {2}uamswp-migration-api#8 {2}merged/);
+        assert.match(events[0], /^GONE {2}aether-wordpress-migration-api#8 {2}merged/);
     });
 
     it('queues an unassigned pull request, with no flags', async () => {
@@ -292,7 +292,7 @@ describe('the event matrix', () => {
         ]);
 
         assert.equal(events.length, 1);
-        assert.match(events[0], /^READY {2}uamswp-migration-api#9 {2}opened ready/);
+        assert.match(events[0], /^READY {2}aether-wordpress-migration-api#9 {2}opened ready/);
     });
 
     it('queues a pull request assigned to another account identically to an unassigned one', async () => {
@@ -306,7 +306,7 @@ describe('the event matrix', () => {
         ]);
 
         assert.equal(events.length, 1);
-        assert.match(events[0], /^READY {2}uamswp-migration-api#9 {2}opened ready/);
+        assert.match(events[0], /^READY {2}aether-wordpress-migration-api#9 {2}opened ready/);
     });
 
     it('reports a merged or closed pull request as GONE regardless of who it was assigned to', async () => {
@@ -321,7 +321,7 @@ describe('the event matrix', () => {
         );
 
         assert.equal(events.length, 1);
-        assert.match(events[0], /^GONE {2}uamswp-migration-api#9 {2}closed/);
+        assert.match(events[0], /^GONE {2}aether-wordpress-migration-api#9 {2}closed/);
     });
 
     it('never enqueues a draft: an opened draft is noted, and a draft push is silent', async () => {
@@ -346,7 +346,7 @@ describe('watchingEvent', () => {
 
         assert.match(watching.subject, /1 repo$/);
         assert.equal(watching.transition, 'every 60s');
-        assert.match(watching.detail, /uamswp-migration-api:1/);
+        assert.match(watching.detail, /aether-wordpress-migration-api:1/);
     });
 });
 
@@ -359,7 +359,7 @@ describe('failure reporting', () => {
         await main(['--once'], { exec: fakeGh({ fail: true }) });
 
         assert.equal(emitted.length, 1);
-        assert.match(emitted[0], /^WATCH-ERROR {2}uamswp-migration-api {2}1 consecutive poll failures/);
+        assert.match(emitted[0], /^WATCH-ERROR {2}aether-wordpress-migration-api {2}1 consecutive poll failures/);
     });
 
     it('reports only the first line of the failure, so one event stays one line', async () => {
@@ -415,7 +415,7 @@ describe('the comment sweep at poll time', () => {
         const glyph = emitted.slice(afterSeed).find((line) => line.startsWith('GLYPH'));
 
         assert.ok(glyph !== undefined, 'a glyph on line 3 of a comment must be reported');
-        assert.match(glyph, /uamswp-migration-api#131/);
+        assert.match(glyph, /aether-wordpress-migration-api#131/);
         assert.match(glyph, /line 3: U\+1F916/);
         assert.ok(! glyph.includes(ROBOT), 'the report must carry code points, never the character');
     });
@@ -558,7 +558,7 @@ describe('the queue-time glyph sweep', () => {
         const glyph = events.find((line) => line.startsWith('GLYPH'));
 
         assert.ok(glyph !== undefined, 'an opened-ready pull request must be swept');
-        assert.match(glyph, /uamswp-migration-api#33/);
+        assert.match(glyph, /aether-wordpress-migration-api#33/);
         assert.match(glyph, /U\+1F916/);
     });
 
@@ -573,7 +573,7 @@ describe('the queue-time glyph sweep', () => {
         const glyph = events.find((line) => line.startsWith('GLYPH'));
 
         assert.ok(glyph !== undefined, 'a draft becoming ready enqueues, so it must be swept');
-        assert.match(glyph, /uamswp-migration-api#34/);
+        assert.match(glyph, /aether-wordpress-migration-api#34/);
     });
 
     it('sweeps the existing queue under --emit-existing, and not a draft in it', async () => {
@@ -593,7 +593,7 @@ describe('the queue-time glyph sweep', () => {
         const glyphs = emitted.filter((line) => line.startsWith('GLYPH'));
 
         assert.equal(glyphs.length, 1, `exactly the ready one is swept, got ${glyphs.length}`);
-        assert.match(glyphs[0], /uamswp-migration-api#35/);
+        assert.match(glyphs[0], /aether-wordpress-migration-api#35/);
     });
 
     it('sweeps a pull request that was already open when the watcher was armed', async () => {
@@ -613,7 +613,7 @@ describe('the queue-time glyph sweep', () => {
         const glyph = events.find((line) => line.startsWith('GLYPH'));
 
         assert.ok(glyph !== undefined, 'a push re-enters the queue and must be swept');
-        assert.match(glyph, /uamswp-migration-api#30/);
+        assert.match(glyph, /aether-wordpress-migration-api#30/);
         assert.match(glyph, /line 3: U\+1F916/);
     });
 
