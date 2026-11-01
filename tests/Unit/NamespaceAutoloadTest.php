@@ -9,8 +9,8 @@ use UAMSWeb\Aether\WordPressImporter\MigrationApi\Token;
  * The package's PSR-4 prefix resolves to `includes/`, and the pre-rename
  * prefix resolves to nothing.
  *
- * A class that moved namespace without `composer.json` following it autoloads
- * nowhere, and a stale prefix left behind would let the old name keep working
+ * A class that moved namespace without `composer.json` following it cannot be
+ * found by Composer, and a stale prefix left behind would let the old name keep working
  * in a consumer that never updated. Both directions are asserted.
  */
 
@@ -32,12 +32,12 @@ test('composer maps the new prefix to includes and nothing maps the old one', fu
         ->and($composer['autoload']['psr-4'])->toBe([MIGRATION_API_PREFIX => 'includes/']);
 });
 
-test('classes autoload under the new prefix, from the nested and the top-level directory', function (): void {
+test('classes resolve under the new prefix', function (): void {
     expect(class_exists(Token::class))->toBeTrue()
         ->and(class_exists(Config::class))->toBeTrue()
         ->and(Token::class)->toBe(MIGRATION_API_PREFIX.'Token');
 });
 
-test('the pre-rename prefix autoloads nothing', function (): void {
+test('the pre-rename prefix resolves to no class', function (): void {
     expect(class_exists(MIGRATION_API_OLD_PREFIX.'Token'))->toBeFalse();
 });
