@@ -39,7 +39,7 @@ repository's decision, recorded with its other decisions; a repository already p
 follows ordinary semver. What a tag *is* differs by repository, and that decides what a breaking
 change means there.
 
-Nothing pins this repository. `UAMS-Web/wordpress-importer` reads it **over HTTP**, not as a
+Nothing pins this repository. `UAMS-Web/aether-wordpress-importer` reads it **over HTTP**, not as a
 package, so a tag moves no dependency and delivers nothing by itself: what the importer sees is
 whatever the development network or production is running. A tag here marks a verified state of
 `main`, so a deployment can name the commit it runs.
@@ -162,7 +162,7 @@ This repository's body carries three fixed sections around the buckets, all thre
 `v0.1.0` and `v0.2.0` before this skill existed:
 
 - **The pre-release note**, one fixed paragraph after the lead and the callout: *Marked
-  pre-release. Nothing pins this repository: `wordpress-importer` reads it over HTTP rather than
+  pre-release. Nothing pins this repository: `aether-wordpress-importer` reads it over HTTP rather than
   as a package.* The generator emits it from `--note`.
 - **`## Verification at this tag`**, after the buckets: the `npm run ci:local` run, read from its
   summary per [`reading-exit-status`](../../rules/reading-exit-status.md), naming **both**
@@ -351,10 +351,10 @@ This repository's invocation:
 
 ```bash
 python3 .claude/skills/writing-release-notes/gen_release_notes.py v0.2.0 "$SHA" \
-    --repo UAMS-Web/uamswp-migration-api \
+    --repo UAMS-Web/aether-wordpress-migration-api \
     --security-word anonymous --maintenance-word rule \
     --lead "One-sentence theme." \
-    --note "Marked pre-release. Nothing pins this repository: \`wordpress-importer\` reads it over HTTP rather than as a package." \
+    --note "Marked pre-release. Nothing pins this repository: \`aether-wordpress-importer\` reads it over HTTP rather than as a package." \
     --verification "\`npm run ci:local\` green on \`$VALIDATED_HEAD\`, all nine jobs; tagged \`$SHA\`, the identical tree." \
     --known-gaps "Carried in \`AGENTS.md\` under *Known gaps* rather than repeated here." \
     > notes.md

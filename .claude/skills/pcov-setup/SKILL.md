@@ -523,7 +523,7 @@ php -r '$_SERVER["argv"] = []; ob_start(); require "tests/bootstrap.php"; ob_end
 
 A `composer mutate` script should name the files that *can* be mutated rather than point at the whole source directory, so a run never reports a meaningless 0% on the ones that cannot.
 
-Here `Plugin::boot()` calls `Site::register()` directly, so `Plugin` and `Site` are both resolved before any test runs; every other class is referenced as a callable array (`[Auth::class, 'guardNamespace']`) or instantiated at `rest_api_init`, and loads later. A full run reports `Site` at **0 killed out of 63**, while deleting `switch_to_blog()` from that same file by hand fails two tests instantly. The tests are fine; the mutants never applied. The namespace to filter on is `UAMSWP\MigrationAPI`. `composer mutate` therefore names its three files explicitly; see `docs/DECISIONS.md` D-023 for why restructuring the plugin so `Site` loads lazily was rejected.
+Here `Plugin::boot()` calls `Site::register()` directly, so `Plugin` and `Site` are both resolved before any test runs; every other class is referenced as a callable array (`[Auth::class, 'guardNamespace']`) or instantiated at `rest_api_init`, and loads later. A full run reports `Site` at **0 killed out of 63**, while deleting `switch_to_blog()` from that same file by hand fails two tests instantly. The tests are fine; the mutants never applied. The namespace to filter on is `UAMSWeb\Aether\WordPressImporter\MigrationApi`. `composer mutate` therefore names its three files explicitly; see `docs/DECISIONS.md` D-023 for why restructuring the plugin so `Site` loads lazily was rejected.
 
 ## Never run a mutation pass alongside another suite run
 

@@ -1397,3 +1397,11 @@ Entries are append-only in spirit: superseding one means adding a new entry that
 - **Why**: the Statamic ecosystem is moving to `aether` names. WordPress keys an active plugin by `folder/main-file`, so a changed folder or main file deactivates the plugin on every site that has it, and `config/defaults.php` lists the slug `uamswp-migration-api` for the stale-options comparison. The namespace and package name reach no installed state.
 - **Consequence**: a consumer of the Composer package changes its requirement and its `use` statements. The sites deploy with WP Pusher, which keeps pointing at the old repository name that GitHub redirects, so an installed plugin keeps its folder; one site is checked for an in-place update after the first release under the new name.
 - **Ref**: #41, D-012, `UAMS-Web/uams-statamic#434`
+
+### D-111: The synced pull-request workflows carry the `RUN_REMOTE_CI` gate
+
+- **Decided**: on 2026-11-02 by the project owner, for #46 and #47 (option A). `assign-author.yml`, `check-attribution-footer.yml`, `check-closing-keyword-across-lines.yml` and `clear-handed-back.yml` take the shared templates' job condition, which starts with `vars.RUN_REMOTE_CI != 'false'`. `AssignAuthorWorkflowTest` pins the gated condition and the new body hash, and the four header comments say each job is gated.
+- **Why**: the workflows are copies of templates owned by `UAMS-Web/uams-claude-skills`, which now gate every job but the aggregate, and a copy must match its template outside the header. The gate is inert here: the organization variable does not reach this public repository (D-105), so `!= 'false'` is true while it is unset and each job still runs. Only a repository variable set to `false` would skip them, as it would every other gated job.
+- **Rejected**: dropping the gate from the `assign-author` template in `UAMS-Web/uams-claude-skills` and re-syncing (option B), which would make one workflow differ from the other three and reverse the template owner's decision for every repository.
+- **Supersedes**: the "deliberately not gated" headers these workflows carried, and the assertion in `AssignAuthorWorkflowTest` that the condition does not mention the variable.
+- **Ref**: #46, #47, D-105, `UAMS-Web/uams-claude-skills#431`

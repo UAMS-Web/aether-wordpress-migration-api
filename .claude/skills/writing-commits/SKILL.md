@@ -116,5 +116,5 @@ git diff --cached --stat        # confirm the staged set is exactly your change
 
 The same discipline applies in a sibling repository when a change needs a companion commit there: stage the named files, never the whole tree. (The cross-repo companion-PR flow itself lives in the [`writing-pull-requests`](../writing-pull-requests/SKILL.md) skill.)
 
-Here that companion is `wordpress-importer`, the consumer of this API.
+Here that companion is `aether-wordpress-importer`, the consumer of this API.
 

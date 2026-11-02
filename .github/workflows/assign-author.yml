@@ -18,8 +18,11 @@ name: Assign author
 # the contributor, so a default assignee left on a ticket is exactly what this
 # exists to correct.
 #
-# Deliberately NOT gated on RUN_REMOTE_CI, like `clear-handed-back.yml`: that
-# switch is off for months at a time, and the job is a few API calls.
+# Gated on RUN_REMOTE_CI like every job but `CI` (D-105): the condition starts with
+# `vars.RUN_REMOTE_CI != 'false'`. The organization's variable does not reach this
+# public repository, so the gate is true while it is unset and the job runs; only a
+# repository variable set to `false` would skip it. The gate is in the template body,
+# not this header, because a copy must match its template outside the header.
 #
 # Three bounds. `closingIssuesReferences` is what the pull request DECLARES: an
 # issue closed only by a keyword in a commit message is not in it, so it is not
@@ -40,7 +43,8 @@ permissions: {}
 jobs:
   assign:
     if: >-
-      github.event.pull_request.user.type != 'Bot'
+      vars.RUN_REMOTE_CI != 'false'
+      && github.event.pull_request.user.type != 'Bot'
       && (github.event.action == 'opened'
       || (github.event.action == 'closed' && github.event.pull_request.merged == true))
     runs-on: ubuntu-latest

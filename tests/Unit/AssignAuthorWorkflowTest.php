@@ -9,8 +9,8 @@ use Symfony\Component\Process\Process;
  * request, and every issue it closes, to exactly the pull request's author.
  *
  * The shape tests pin what the job runs on: `opened` and a merged `closed`,
- * never a bot's pull request, never gated on `RUN_REMOTE_CI`, and only the two
- * scopes it writes with. The behavior tests run the step's own script, read
+ * never a bot's pull request, gated on `RUN_REMOTE_CI` like every job but `CI`
+ * (D-105), and only the two scopes it writes with. The behavior tests run the step's own script, read
  * from the workflow, against a stub `gh` that records every call. The real `jq`
  * filters run, so a changed filter is exercised rather than trusted. Each
  * failure the script must report shows here as a non-zero exit: a dropped
@@ -45,7 +45,7 @@ const ASSIGN_AUTHOR_REPO = 'UAMS-Web/aether-wordpress-migration-api';
  * `wordpress-importer` and this repository, so a one-sided edit changes this
  * hash and fails here, before the copies can drift apart.
  */
-const ASSIGN_AUTHOR_BODY_SHA256 = '83679189f8977da63396f0dac3d28849c628371ea6a894c443830c2729b10b17';
+const ASSIGN_AUTHOR_BODY_SHA256 = '74395f5e5cae7a5157b86762f54bded31cee3c29c3817d0c83229fac1c105a11';
 
 /**
  * The workflow's source, or another file's when a path is given.
@@ -421,13 +421,15 @@ it('triggers on a pull request opening or closing and on nothing else', function
 
 it('runs its job only for a user on an opened or merged pull request', function (): void {
     expect(assignAuthorCondition())->toBe(
-        "github.event.pull_request.user.type != 'Bot' && (github.event.action == 'opened' || (github.event.action == 'closed' && github.event.pull_request.merged == true))"
+        "vars.RUN_REMOTE_CI != 'false' && github.event.pull_request.user.type != 'Bot' && (github.event.action == 'opened' || (github.event.action == 'closed' && github.event.pull_request.merged == true))"
     );
 });
 
-it('is not gated on RUN_REMOTE_CI', function (): void {
-    // Search only the YAML itself, since the header comment names the variable to explain its absence
-    expect(implode("\n", assignAuthorCodeLines()))->not->toContain('RUN_REMOTE_CI');
+it('is gated on RUN_REMOTE_CI like every job but CI', function (): void {
+    // D-105: the organization's variable does not reach this public repository, so the
+    // gate is true while it is unset and the job runs; only a repository variable set to
+    // `false` skips it. The synced template carries the gate, and this copy follows it.
+    expect(assignAuthorCondition())->toStartWith("vars.RUN_REMOTE_CI != 'false' && ");
 });
 
 it('grants no permission beyond writing issues and pull requests', function (): void {
