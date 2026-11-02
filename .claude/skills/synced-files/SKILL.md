@@ -56,7 +56,7 @@ Do not fix it by regenerating anything here. Restore the named file from git to 
 
 ## Workflow copies
 
-The sync writes no workflow under `.github/` (its one file there is the pull request template), so the workflows the shared skills ship as templates (`assign-author.yml`, `check-attribution-footer.yml` and `check-closing-keyword-across-lines.yml` from `writing-pull-requests`, `clear-handed-back.yml` from `handed-back-label`) are copied once and then drift unseen. This skill's second script compares each copy with its template:
+The sync creates no workflow under `.github/`, so the workflows the shared skills ship as templates (`assign-author.yml`, `check-attribution-footer.yml` and `check-closing-keyword-across-lines.yml` from `writing-pull-requests`, `clear-handed-back.yml` from `handed-back-label`) are copied once by the repository. When a template later changes, the sync rewrites an existing copy in the same pull request, keeping the copy's header, if the sync App may push workflow files (it needs the `workflows` permission; see the `handed-back-label` skill). A hand edit, or a copy the sync could not push, still drifts unseen. This skill's second script compares each copy with its template:
 
 ```sh
 node .claude/skills/synced-files/scripts/check-workflow-copies.mjs

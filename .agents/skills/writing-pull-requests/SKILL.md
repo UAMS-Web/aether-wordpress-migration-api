@@ -67,6 +67,8 @@ which the workflow calls from the skill's own directory, so a target needs the s
 workflow and nothing else. It lives here rather than beside the emoji rule because a rule
 cannot own a template; the rule that bans the glyph is `no-emoji-in-durable-records`.
 
+All three workflows are gated on `RUN_REMOTE_CI` with a job-level `if: vars.RUN_REMOTE_CI != 'false'`, so a private repository with the variable set to `false` skips them and bills no minutes, and a public repository runs them as before. A skipped job reports `skipped` and a skipped required check reports success, so while the switch is off the body checks have not read the body. The gate is in the template because a copy must match its template outside the header.
+
 The closing-keyword check runs [`scripts/check-closing-keyword-across-lines.mjs`](scripts/check-closing-keyword-across-lines.mjs) the same way. GitHub reads a newline as whitespace, so a status column whose last cell is `closed` above a row labelled `#N` is the directive `closed #N`, and a squash merge acts on it. The workflow reads the body through the API, and the script runs the `github-api-budget` same-line control before it reads anything. `--range` and `--commit` read commit messages instead. Reword a flagged pair: put the number first, or write the cell as something other than a bare keyword.
 
 ## Output format
@@ -445,7 +447,7 @@ Measured in both directions. Against `UAMS-Web/uams-statamic` at `f12ba37e4` it 
 
 > **The dangerous case is the companion nothing forces you to finish.** When the dependent change stands on its own: it tolerates both the old and the new shape, a guard that makes the companion's repair merely *correct* rather than *required*, so no test goes red, nothing prompts the second merge, and a half-landed pair can sit indefinitely looking complete. Write the `## Test plan` item for the second half **whenever there is a companion at all**, dependent or not, and treat the pair as unfinished until both have merged.
 
-The companion here is `wordpress-importer`, the consumer of this API. A change to a response shape almost always has one: the importer has to be able to read what this plugin starts sending, e.g. `` - [`UAMS-Web/wordpress-importer-archive#587`](https://github.com/UAMS-Web/wordpress-importer-archive/pull/587): teaches the importer to read the `acf` block this PR starts emitting; merge this one first so the importer never sees a shape it cannot parse. `` This repo's gate cannot see the importer, and the importer's cannot see this repo.
+The companion here is `aether-wordpress-importer`, the consumer of this API. A change to a response shape almost always has one: the importer has to be able to read what this plugin starts sending, e.g. `` - [`UAMS-Web/wordpress-importer-archive#587`](https://github.com/UAMS-Web/wordpress-importer-archive/pull/587): teaches the importer to read the `acf` block this PR starts emitting; merge this one first so the importer never sees a shape it cannot parse. `` This repo's gate cannot see the importer, and the importer's cannot see this repo.
 
 ## Bullets, headings, tables
 

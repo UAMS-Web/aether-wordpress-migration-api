@@ -46,7 +46,8 @@ permissions: {}
 jobs:
   clear:
     if: >-
-      contains(github.event.pull_request.labels.*.name, 'handed-back')
+      vars.RUN_REMOTE_CI != 'false'
+      && contains(github.event.pull_request.labels.*.name, 'handed-back')
       && (github.event.action == 'synchronize'
       || (github.event.action == 'edited'
       && github.event.changes.body != null

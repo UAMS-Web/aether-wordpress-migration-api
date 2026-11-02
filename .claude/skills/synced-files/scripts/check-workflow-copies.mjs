@@ -3,10 +3,11 @@
 // check-workflow-copies.mjs: fail when a repository's copy of a shared workflow differs
 // from the template the owning skill ships, outside the header (UAMS-Web/uams-claude-skills#155).
 //
-// The sync delivers the templates under .claude/ and .agents/ and never writes .github/,
-// so each repository copies a workflow once, through its own reviewed pull request. Nothing
-// then keeps the two together: a hand edit to the copy, or a template change the copy never
-// received, goes unnoticed. This check is what notices.
+// The sync delivers the templates under .claude/ and .agents/ and does not create a copy
+// under .github/, so each repository copies a workflow once, through its own reviewed pull
+// request. The sync then rewrites an existing copy when its template changes
+// (UAMS-Web/uams-claude-skills#431), but a hand edit to the copy, or a copy the sync could
+// not push, goes unnoticed. This check is what notices.
 //
 // THE HEADER
 //     A copy may change the comment block between the `name:` line and the `on:` line, which

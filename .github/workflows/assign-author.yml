@@ -40,7 +40,8 @@ permissions: {}
 jobs:
   assign:
     if: >-
-      github.event.pull_request.user.type != 'Bot'
+      vars.RUN_REMOTE_CI != 'false'
+      && github.event.pull_request.user.type != 'Bot'
       && (github.event.action == 'opened'
       || (github.event.action == 'closed' && github.event.pull_request.merged == true))
     runs-on: ubuntu-latest
