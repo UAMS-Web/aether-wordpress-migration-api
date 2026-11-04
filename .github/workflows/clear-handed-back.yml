@@ -27,9 +27,8 @@ name: Clear handed-back
 # repository, where the variable is unset, runs it as before. A skipped job reports
 # `skipped`, and GitHub counts a skipped required check as success, so a skipped run is
 # not a passing run: while the switch is off nothing removes the label on a push or a
-# description edit, and the label stays until the next run with the switch on. The gate
-# is in the template body, not the header, because a copy must match its template
-# outside the header.
+# description edit, and the label stays until the next run with the switch on. A copy
+# matches its template in full, header included, and the sync rewrites it from the template.
 #
 # Where a repository's `.claude/settings.json` denies `gh api -X DELETE`, the
 # gate's own sessions cannot make this call. This job runs under its own
