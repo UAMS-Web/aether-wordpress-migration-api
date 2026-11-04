@@ -67,7 +67,7 @@ which the workflow calls from the skill's own directory, so a target needs the s
 workflow and nothing else. It lives here rather than beside the emoji rule because a rule
 cannot own a template; the rule that bans the glyph is `no-emoji-in-durable-records`.
 
-All three workflows are gated on `RUN_REMOTE_CI` with a job-level `if: vars.RUN_REMOTE_CI != 'false'`, so a private repository with the variable set to `false` skips them and bills no minutes, and a public repository runs them as before. A skipped job reports `skipped` and a skipped required check reports success, so while the switch is off the body checks have not read the body. The gate is in the template because a copy must match its template outside the header.
+All three workflows are gated on `RUN_REMOTE_CI` with a job-level `if: vars.RUN_REMOTE_CI != 'false'`, so a private repository with the variable set to `false` skips them and bills no minutes, and a public repository runs them as before. A skipped job reports `skipped` and a skipped required check reports success, so while the switch is off the body checks have not read the body. The gate is in the template because a copy must match its template in full.
 
 The closing-keyword check runs [`scripts/check-closing-keyword-across-lines.mjs`](scripts/check-closing-keyword-across-lines.mjs) the same way. GitHub reads a newline as whitespace, so a status column whose last cell is `closed` above a row labelled `#N` is the directive `closed #N`, and a squash merge acts on it. The workflow reads the body through the API, and the script runs the `github-api-budget` same-line control before it reads anything. `--range` and `--commit` read commit messages instead. Reword a flagged pair: put the number first, or write the cell as something other than a bare keyword.
 
@@ -137,14 +137,21 @@ green checks panel.
   while you know the branch is unfinished.
 - **In a public repository, the draft's remote checks are the pre-PR check.** Its `ci.yml` runs on
   every pull request, drafts included (the `RUN_REMOTE_CI` switch reaches private repositories
-  only), and the local runner's jobs mirror it. So run nothing locally as a pre-PR check: push the
-  branch and open the pull request as a draft, docs-only ones included, and flip it to ready only
-  when every remote check on its head is green. When a check is red, fix it and push to the same
+  only), and the local runner's jobs mirror it. So the full chain is not run locally as a pre-PR
+  check: push the branch and open the pull request as a draft, docs-only ones included, and flip
+  it to ready only when every remote check on its head is green. **Before each push, run the
+  three static tools on the changed files** with the commands in the
+  `code-quality` skill's job table (where the repository carries it): Pint (`vendor/bin/pint --test`) and
+  Rector (`vendor/bin/rector --dry-run`), each given the changed PHP files, and PHPStan
+  (`composer stan`). They take seconds to about
+  a minute, and a style failure caught here saves a push and a wait. A repository without one of
+  the tools skips it. When a check is red, fix it and push to the same
   branch; the draft re-runs, and a new pull request for the same change is never the answer. Keep
   running a test locally while writing it, and keep a local run for the four cases remote CI
   cannot cover:
   - a change whose acceptance criteria name Windows or another platform remote CI does not run
-    (it runs on Ubuntu only);
+    (read the `os` matrix in its `ci.yml`: `aether-wordpress-importer`, `uams-statamic` and
+    `aether-wordpress-migration-api` run Ubuntu and Windows);
   - the full mutation run a test-coverage ticket records (remote CI runs one smoke path);
   - a run that needs a loaded WordPress install or the importer's host application;
   - any repository with no remote CI workflow, including a private one.
@@ -158,7 +165,7 @@ green checks panel.
   first. Put it on the *dependent* PR, where whoever is about to merge will read it, rather than
   only on the one that goes first. See **Companion PRs and merge order** below.
 
-**Remote CI runs here on every pull request.** This repository is public, so the org-level `RUN_REMOTE_CI` Actions variable, which is scoped to private repositories, does not reach it, and `.github/workflows/ci.yml` reports real results on drafts and ready pull requests alike (`UAMS-Web/uamswp-migration-api#7`, `UAMS-Web/wordpress-importer#163`, `UAMS-Web/uams-statamic#337`). Validation of a ready pull request runs through the [`local-ci`](../local-ci/SKILL.md) skill.
+**Remote CI runs here on every pull request.** This repository is public, so the org-level `RUN_REMOTE_CI` Actions variable, which is scoped to private repositories, does not reach it, and `.github/workflows/ci.yml` reports real results on drafts and ready pull requests alike (`UAMS-Web/uamswp-migration-api#7`, `UAMS-Web/aether-wordpress-importer#163`, `UAMS-Web/uams-statamic#337`). Validation of a ready pull request runs through the [`local-ci`](../local-ci/SKILL.md) skill.
 
 **A red hand-back comes back as a comment and a label, not as a draft flip.** The gate comments its verdict on the pull request and applies the `handed-back` label; it never flips the pull request to draft, because `ready → draft` is the author's own signal. The label comes off when the pull request re-enters the queue: a push to its head, and a workflow under `.github/workflows/` does that removal on the push itself, so the author never applies or removes it by hand. Watch for the verdict comment, fix, and push; the push is what re-arms the gate.
 

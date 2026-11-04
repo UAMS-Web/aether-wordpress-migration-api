@@ -10,10 +10,10 @@ name: Download archive
 # UAMS-Web/uams-claude-skills, copied to .github/workflows/download-archive.yml in a public
 # WordPress repository. A private repository runs the same check as the `download-archive`
 # job of the shared local CI runner instead (templates/local-ci.json in the local-ci skill),
-# because it does not run Actions. This header is the only part a repository may change. The
-# synced-files skill's check-workflow-copies.mjs fails when the rest differs from the
-# template. The script it runs ships in the same skill, so no repository file is needed
-# beyond the synced .claude/ tree.
+# because it does not run Actions. The copy should match this template in full, header
+# included; the synced-files skill's check-workflow-copies.mjs does not cover this workflow.
+# The script it runs ships in the same skill, so no repository file is needed beyond the
+# synced .claude/ tree.
 #
 # It is a copied template and not a workflow that other repositories call.
 #
@@ -22,9 +22,7 @@ name: Download archive
 # `false`, skips it before a runner is dispatched and bills no minutes, and a public
 # repository, where the variable is unset, runs it as before. A skipped job reports
 # `skipped`, and GitHub counts a skipped required check as success, so a skipped run is
-# not a passing run: nothing has checked the download while the switch is off. The gate
-# is in the template body, not the header, because a copy must match its template outside
-# the header.
+# not a passing run: nothing has checked the download while the switch is off.
 
 on:
   pull_request:
