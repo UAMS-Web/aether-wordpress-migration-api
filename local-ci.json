@@ -1,5 +1,5 @@
 {
-  "_note": "The shared local CI runner's job list for this repository (#366). Every job is always selected, as the private runner it replaces ran every job on every run, and chain stops at the first failure, as ci.yml's needs: chain does. tests/Unit/CiParityTest.php holds the job order against ci.yml. ci.yml's last job, `ci`, has no counterpart here: it aggregates the remote jobs into the `CI` check the ruleset requires, and this run does not gate a merge (D-105). ci.yml runs each job on ubuntu-latest and windows-latest (#25); this runs each job once, on the host's own operating system.",
+  "_note": "The shared local CI runner's job list for this repository (#366). Every job is always selected, as the private runner it replaces ran every job on every run, and chain stops at the first failure, as ci.yml's needs: chain does. tests/Unit/CiParityTest.php holds the job order against ci.yml. ci.yml's last job, `ci`, has no counterpart here: it aggregates the remote jobs into the `CI` check the ruleset requires, and this run does not gate a merge (D-105). ci.yml's checks job calls the shared chain, whose jobs run here one by one, from validate to mutate-ignore (#49). ci.yml runs each job on ubuntu-latest and windows-latest (#25); this runs each job once, on the host's own operating system.",
   "_prepare": "patches is off: prepare runs before any job, so it would reinstall the slot's old package versions against the commit's patches. The dependencies job installs first and re-syncs patches second, as the private runner did.",
   "base": "main",
   "php": "8.4",
@@ -30,12 +30,6 @@
       "always": true
     },
     {
-      "name": "validate",
-      "run": "composer validate --no-check-publish --no-check-all",
-      "always": true,
-      "requires": ["bin:composer"]
-    },
-    {
       "name": "floor-functions",
       "_note": "Asks PHP 8.2 about each call in a shipped file to a function a development polyfill defines; PHPStan cannot see past a polyfill for a function newer than the PHP it runs on (#399). Reads the polyfills the dependencies job installed.",
       "run": "php scripts/check-floor-functions.php",
@@ -45,13 +39,6 @@
     {
       "name": "glyph",
       "run": "node scripts/check-no-glyphs.mjs",
-      "always": true,
-      "requires": ["bin:node"]
-    },
-    {
-      "name": "synced-files",
-      "_note": "A hand edit to a file the shared sync manages fails the run. ci.yml runs it too, since #10.",
-      "run": "node .claude/skills/synced-files/scripts/check-synced-files.mjs",
       "always": true,
       "requires": ["bin:node"]
     },
@@ -70,13 +57,6 @@
       "requires": ["bin:node", "bin:git"]
     },
     {
-      "name": "aggregate-needs",
-      "_note": "Fails naming a ci.yml job missing from the CI job's needs: list, or a required check name no job reports (#10). Copied by hand from uams-claude-skills ahead of the sync that will list it.",
-      "run": "node .claude/skills/code-quality/scripts/check-aggregate-needs.mjs",
-      "always": true,
-      "requires": ["bin:node"]
-    },
-    {
       "name": "spell",
       "_note": "No node_modules requirement: the runner checks requires before any job runs, so one would skip this job in a slot the dependencies job has not yet filled. An absent tree fails instead.",
       "run": "npm run spell",
@@ -84,19 +64,55 @@
       "requires": ["bin:npm"]
     },
     {
+      "name": "validate",
+      "_note": "Run remotely by the called chain's composer-validate job (#49).",
+      "run": "composer validate --no-check-publish --no-check-all",
+      "always": true,
+      "requires": ["bin:composer"]
+    },
+    {
+      "name": "synced-files",
+      "_note": "A hand edit to a file the shared sync manages fails the run. Run remotely by the called chain's synced-files job (#49).",
+      "run": "node .claude/skills/synced-files/scripts/check-synced-files.mjs",
+      "always": true,
+      "requires": ["bin:node"]
+    },
+    {
+      "name": "no-emoji",
+      "_note": "The shared sweep for the no-emoji rule, which the called chain's no-emoji job runs (#49). The glyph job runs this repository's own script for the same rule.",
+      "run": "node .claude/skills/writing-comments/scripts/check-no-emoji.mjs",
+      "always": true,
+      "requires": ["bin:node"]
+    },
+    {
+      "name": "aggregate-needs",
+      "_note": "Fails naming a ci.yml job missing from the CI job's needs: list, or a required check name no job reports (#10). Run remotely by the called chain's aggregate-needs job (#49).",
+      "run": "node .claude/skills/code-quality/scripts/check-aggregate-needs.mjs",
+      "always": true,
+      "requires": ["bin:node"]
+    },
+    {
       "name": "pint",
+      "_note": "Run remotely by the called chain's pint job as `composer test:pint`, the same whole-tree check (#49).",
       "run": "vendor/bin/pint --test",
       "always": true
     },
     {
       "name": "rector",
-      "_note": "--clear-cache: the slot is reused, and Rector skips any file whose content is unchanged, so a warm cache could hide a rule that a change elsewhere now fires. ci.yml runs cold in a fresh temp dir. The runner's single-flight lock means no concurrent Rector shares this slot's cache.",
+      "_note": "--clear-cache: the slot is reused, and Rector skips any file whose content is unchanged, so a warm cache could hide a rule that a change elsewhere now fires. The called chain's rector job runs `composer test:refactor` on a fresh runner, whose cache starts empty (#49). The runner's single-flight lock means no concurrent Rector shares this slot's cache.",
       "run": "vendor/bin/rector --dry-run --no-progress-bar --clear-cache",
       "always": true
     },
     {
       "name": "phpstan",
+      "_note": "Run remotely by the called chain's phpstan job as `composer stan` (#49).",
       "run": "vendor/bin/phpstan analyze --no-progress --memory-limit=2G",
+      "always": true
+    },
+    {
+      "name": "mutate-ignore",
+      "_note": "Fails naming a bare or inert @pest-mutate-ignore annotation; the called chain's mutate-ignore job runs it (#49). The paths are named because the default `tests` walks into tests/Integration/vendor, which a reused slot has and a cold checkout does not, and whose pest-plugin-mutate carries markers of its own. No vendor requirement, for the reason the spell job gives.",
+      "run": "php .claude/skills/pest-testing/scripts/check-mutate-ignore.php includes tests/Unit tests/Support tests/Integration/Feature tests/Integration/Mutate",
       "always": true
     },
     {

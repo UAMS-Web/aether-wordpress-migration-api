@@ -9,7 +9,10 @@ declare(strict_types=1);
  * job list GitHub executes, the other the job list the shared local CI runner
  * (`.claude/skills/local-ci/local-ci.mjs`) executes (#366). They are not
  * byte-comparable, and local-ci.json carries local-only jobs with no
- * counterpart on a fresh-checkout runner, named in ciLocalOnlyJobs().
+ * counterpart on a fresh-checkout runner, named in ciLocalOnlyJobs(). One
+ * workflow job, ciCallJob(), calls the shared chain in UAMS-Web/uams-ci-workflows,
+ * and the local runner runs the jobs of that chain one by one, named in
+ * ciCalledJobs() (#49).
  *
  * What CAN be compared mechanically is compared here, because the alternative is
  * a mirror that drifts in silence. `.githooks/pre-commit` insists the two files
@@ -84,6 +87,39 @@ function ciLocalOnlyJobs(): array
     return [
         // Installs into the runner's reused slot; Actions installs cold every job.
         'dependencies',
+    ];
+}
+
+/**
+ * The workflow job that calls the shared chain (#49).
+ */
+function ciCallJob(): string
+{
+    return 'checks';
+}
+
+/**
+ * The called chain's jobs that run, each with the local job that mirrors it, in
+ * the order the local runner runs them.
+ *
+ * The chain's `pest` and `mutate` jobs are switched off by the call's inputs and
+ * are not listed: this repository runs its Pest suites as its own `pest` job,
+ * and `composer mutate` is outside the gate. The chain's optional jobs are off
+ * unless an input turns them on, and the call turns none on.
+ *
+ * @return array<string, string>
+ */
+function ciCalledJobs(): array
+{
+    return [
+        'composer-validate' => 'validate',
+        'synced-files' => 'synced-files',
+        'no-emoji' => 'no-emoji',
+        'aggregate-needs' => 'aggregate-needs',
+        'pint' => 'pint',
+        'rector' => 'rector',
+        'phpstan' => 'phpstan',
+        'mutate-ignore' => 'mutate-ignore',
     ];
 }
 
@@ -163,6 +199,43 @@ function ciChainedJobs(): array
     unset($jobs[ciAggregateJob()]);
 
     return $jobs;
+}
+
+/**
+ * The chained jobs that run on a runner of their own: every one but the call.
+ *
+ * @return array<string, string>
+ */
+function ciPlainJobs(): array
+{
+    $jobs = ciChainedJobs();
+
+    // A throw for the reason ciChainedJobs() gives: without the call, the call's
+    // test would have nothing to read.
+    if (! isset($jobs[ciCallJob()])) {
+        throw new RuntimeException('ci.yml has no `'.ciCallJob().'` job.');
+    }
+
+    unset($jobs[ciCallJob()]);
+
+    return $jobs;
+}
+
+/**
+ * The workflow's chain with the call replaced by the local jobs that mirror the
+ * jobs it runs, which is the order the local runner must follow.
+ *
+ * @return list<string>
+ */
+function ciExpandedWorkflowChain(): array
+{
+    $chain = [];
+
+    foreach (ciWorkflowChain() as $job) {
+        array_push($chain, ...($job === ciCallJob() ? array_values(ciCalledJobs()) : [$job]));
+    }
+
+    return $chain;
 }
 
 /**
@@ -364,7 +437,7 @@ it('runs every chained job on both Linux and Windows', function (): void {
     // failed leg pass, so each of those takes a leg out with that line intact.
     $missingLeg = [];
 
-    foreach (ciChainedJobs() as $job => $body) {
+    foreach (ciPlainJobs() as $job => $body) {
         $matrix = preg_match('/^        os: \[(.*)\]$/m', $body, $matches) === 1
             ? array_map(trim(...), explode(',', $matches[1]))
             : [];
@@ -377,24 +450,49 @@ it('runs every chained job on both Linux and Windows', function (): void {
         }
     }
 
-    expect(ciChainedJobs())->not->toBe([])
+    expect(ciPlainJobs())->not->toBe([])
         ->and($missingLeg)->toBe([]);
+});
+
+it('calls the shared chain at a release tag, on Linux and Windows, with its Pest and mutation jobs off', function (): void {
+    // A branch reference would let a change to the shared chain reach this
+    // repository without a change here. The call has no matrix of its own: its
+    // `windows-jobs` input gives each named job a Linux and a Windows leg and
+    // no macOS leg, so a called job missing from it runs on Linux alone and
+    // takes Windows out of the gate with nothing failing (D-108).
+    // `all-platform-jobs` and `linux-only` would add macOS legs or remove the
+    // Windows ones. The chain's `pest` job cannot boot WordPress, and its
+    // `mutate` job runs `composer mutate`, which needs it too.
+    $body = ciChainedJobs()[ciCallJob()];
+
+    preg_match('/^      windows-jobs: (.+)$/m', $body, $windows);
+    $windowsJobs = explode(' ', trim($windows[1] ?? ''));
+    sort($windowsJobs);
+    $calledJobs = array_keys(ciCalledJobs());
+    sort($calledJobs);
+
+    expect($body)->toMatch('#^    uses: UAMS-Web/uams-ci-workflows/\.github/workflows/ci\.yml@v\d+\.\d+\.\d+$#m')
+        ->and($body)->toMatch('/^      pest: false$/m')
+        ->and($body)->toMatch('/^      mutate: false$/m')
+        ->and($body)->not->toMatch('/^      (all-platform-jobs|linux-only|encoding-guard|vitest|vite-build|mutation-smoke):/m')
+        ->and($windowsJobs)->toBe($calledJobs);
 });
 
 it('runs the same jobs, in the same order, locally and remotely', function (): void {
     // The one assertion that actually catches drift: a job added to ci.yml and
     // not to the runner is a job the local gate never runs, and while
     // RUN_REMOTE_CI is off the local gate is the only gate there is.
+    // The call counts as the local jobs that mirror the jobs it runs.
     $shared = array_values(array_diff(ciLocalChain(), ciLocalOnlyJobs()));
 
-    expect($shared)->toBe(ciWorkflowChain());
+    expect($shared)->toBe(ciExpandedWorkflowChain());
 });
 
 it('names every local-only job, and no workflow job as local-only', function (): void {
     // A stale entry in ciLocalOnlyJobs() would excuse a job the runner no
     // longer has; a workflow job listed there would vanish from the comparison.
     expect(array_values(array_diff(ciLocalOnlyJobs(), ciLocalChain())))->toBe([])
-        ->and(array_values(array_intersect(ciLocalOnlyJobs(), ciWorkflowChain())))->toBe([]);
+        ->and(array_values(array_intersect(ciLocalOnlyJobs(), ciExpandedWorkflowChain())))->toBe([]);
 });
 
 it('runs every local job on every run, stopping at the first failure', function (): void {

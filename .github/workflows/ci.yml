@@ -19,36 +19,65 @@ permissions:
 
 # Bash on both operating systems (#25). A Windows runner defaults `run:` to
 # PowerShell, and every step here is written for a POSIX shell; Git Bash ships
-# on the Windows image.
+# on the Windows image. A default does not reach a called workflow, whose own
+# steps say which shell they need.
 defaults:
   run:
     shell: bash
 
+# THE SHARED CHAIN (#49, D-112). The `checks` job calls the reusable workflow
+# `UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml` at a release tag, the
+# shared chain the code-quality template's caller form adopts. The tag moves
+# only when this file moves it; Dependabot does not. The call runs these
+# jobs, each reported as `checks / <job name> (<runner>)`, and ends in its own
+# `Chain result` job, which fails unless each of them succeeded:
+#
+#   composer-validate, synced-files, no-emoji, aggregate-needs, pint, rector,
+#   phpstan, mutate-ignore
+#
+# Two of the chain's jobs are switched off with inputs, and run here instead:
+#
+#   - `pest: false`. The called `pest` job runs `composer test` with no MySQL
+#     and no WordPress tree, and four of this repository's five Pest processes
+#     boot WordPress against MySQL. The `pest` job below stays.
+#   - `mutate: false`. `composer mutate` runs the WordPress suite too, and was
+#     not part of this workflow before the call.
+#
+# The jobs the chain has no counterpart for stay as plain jobs: the WordPress
+# guards (`load-guard`, `lint-floor`, `floor-functions`, `download-archive`),
+# `glyph` (the repository's own script for the rule the called `no-emoji`
+# checks), `handed-back-workflow`, `spell`, `mutate-ignore-breadth`, `pest` and
+# `node-test`. The called jobs need what this repository carries:
+# `.github/actions/setup/action.yml` (the code-quality template's setup
+# action), the synced `.claude/skills` scripts, and the Composer scripts
+# `test:pint`, `test:refactor` and `stan`.
+#
 # REQUIRED CHECKS (D-105). A ruleset for this repository requires three
 # contexts on `main`: `CI`, `Attribution footer` and `Closing keywords`, the
 # same three the Statamic add-ons require. `CI` is the last job in this file; it
-# `needs:` every other job, runs `if: always()`, and fails unless every needed
-# job reports `success` (a `skipped` or `cancelled` job fails it). The ruleset
-# therefore never lists a job by name: renaming a job changes nothing it
-# requires, and a new job is required once it is added to the `needs:` list of
-# `CI`. Add it there in the same change. Do not rename `CI`. The other two are
-# the jobs of `check-attribution-footer.yml` and
+# `needs:` every other job, the call included, runs `if: always()`, and fails
+# unless every needed job reports `success` (a `skipped` or `cancelled` job
+# fails it). The ruleset therefore never lists a job by name: renaming a job
+# changes nothing it requires, and a new job is required once it is added to
+# the `needs:` list of `CI`. Add it there in the same change. Do not rename
+# `CI`. The other two are the jobs of `check-attribution-footer.yml` and
 # `check-closing-keyword-across-lines.yml`. Job names must stay unique across
 # every workflow in this repository. The shared local CI runner
 # (`local-ci.json`) does not gate a merge.
 #
 # RUN_REMOTE_CI: off switch (#18). Every job but `CI` is gated on
-# `if: vars.RUN_REMOTE_CI != 'false'`. Set an Actions variable `RUN_REMOTE_CI`
-# to `false` and they report `skipped` without being dispatched to a runner,
-# so `CI` fails and no pull request can merge until it is unset. Unset (or any
-# value other than `false`) = CI runs normally, which is the default.
+# `if: vars.RUN_REMOTE_CI != 'false'`, the call included. Set an Actions
+# variable `RUN_REMOTE_CI` to `false` and they report `skipped` without being
+# dispatched to a runner, so `CI` fails and no pull request can merge until it
+# is unset. Unset (or any value other than `false`) = CI runs normally, which
+# is the default.
 #
 #   - The switch began as a budget kill-switch for private repositories, whose
 #     Actions minutes bill to one organization pool. This repository is public,
 #     so its runs do not, and the organization variable (scoped to private
 #     repositories) does not reach it. Only a REPOSITORY variable turns it off
 #     here.
-#   - `vars` cannot gate `on:` triggers, only `if:` — the workflow still
+#   - `vars` cannot gate `on:` triggers, only `if:`: the workflow still
 #     evaluates per event, but skipped jobs are never dispatched to a runner.
 #   - A job skipped by its `if:` reports success to a required check (D-101),
 #     which is why the ruleset requires `CI` and never a gated job.
@@ -59,21 +88,17 @@ defaults:
 # are hand-maintained mirrors with NO shared source of truth: when you add,
 # remove, or reorder a job here, mirror it there, and vice versa. The
 # parity-critical surface is each job's final run step, flagged inline with
-# `# PARITY:` below:
+# `# PARITY:` below, and for the call, the list of called jobs:
 #
 #   load-guard -> "Run the no-vendor load guard"
 #   lint-floor -> "Lint every shipped PHP file on the floor"
-#   validate   -> "Run composer validate"
 #   floor-functions -> "Check shipped files for functions the floor lacks"
 #   glyph      -> "Run the glyph audit"
-#   synced-files -> "Check the synced files against the manifest"
 #   handed-back-workflow -> "Check the handed-back workflow against its template"
 #   download-archive -> "Check what the GitHub download holds"
-#   aggregate-needs -> "Check every job is in the CI job's needs"
 #   spell      -> "Run cspell"
-#   pint       -> "Determine changed PHP files" + "Run Pint on changed files"
-#   rector     -> "Run Rector (gating profile, dry-run)"
-#   phpstan    -> "Run PHPStan"
+#   checks     -> the local jobs validate, synced-files, no-emoji,
+#                 aggregate-needs, pint, rector, phpstan and mutate-ignore
 #   mutate-ignore-breadth -> "Measure each mutation annotation's breadth"
 #   pest       -> "Run the Pest suites"
 #   node-test  -> "Run the script tests"
@@ -81,7 +106,11 @@ defaults:
 # JOB CHAIN (cost-ordered): the jobs run as a strict sequential chain via
 # `needs:`, shortest -> longest:
 #
-#   load-guard -> lint-floor -> validate -> floor-functions -> glyph -> synced-files -> handed-back-workflow -> download-archive -> aggregate-needs -> spell -> pint -> rector -> phpstan -> mutate-ignore-breadth -> pest -> node-test
+#   load-guard -> lint-floor -> floor-functions -> glyph -> handed-back-workflow -> download-archive -> spell -> checks -> mutate-ignore-breadth -> pest -> node-test
+#
+# Inside the call the chain is the shared one: the four checks that need no
+# install run side by side, then Pint, then Rector and PHPStan, and the
+# mutation-annotation check.
 #
 # node-test runs LAST despite needing neither Composer nor npm, matching where
 # wordpress-importer's reference implementation places it, ported rather than
@@ -93,24 +122,28 @@ defaults:
 # stops at the first failure.
 #
 # TWO OPERATING SYSTEMS (#25, D-108). Every link in the chain runs on
-# `ubuntu-latest` and `windows-latest`, as a matrix on `os` that is not
-# fail-fast. `needs:` names a job id, so each link waits for both legs of the
-# one before it, and `CI` reads each job's combined result, which is `success`
-# only when both legs succeeded. `tests/Unit/CiParityTest.php` fails when a job
-# drops a leg. The Windows leg is there to catch what only Windows does (paths,
-# command-line and filter limits, console behavior) on the pull request rather
-# than on the next Windows workstation. Standard runners cost no minutes on a
-# public repository; the cost is wall-clock, since a link waits for its slower
-# leg. `run:` defaults to bash on both, so both legs run the same commands.
-# Two things in the `pest` job differ by operating system: a Windows runner
-# cannot run service containers, so MySQL is a service on Linux and two
-# Windows-only steps (set up MySQL, create the database) on Windows; and the
-# WordPress download converts `RUNNER_TEMP` with `cygpath` where it exists.
-# The `CI` job itself runs once, on Linux.
+# `ubuntu-latest` and `windows-latest`. A plain job does it as a matrix on
+# `os` that is not fail-fast; the call does it with its `windows-jobs` input,
+# which names every called job that runs and gives each a Linux and a Windows
+# leg and no macOS leg. `needs:` names a job id, so each link waits for both
+# legs of the one before it, and `CI` reads each job's combined result, which
+# is `success` only when both legs succeeded. `tests/Unit/CiParityTest.php`
+# fails when a plain job drops a leg or a called job is missing from
+# `windows-jobs`. The Windows leg is there to catch what only Windows does
+# (paths, command-line and filter limits, console behavior) on the pull
+# request rather than on the next Windows workstation. Standard runners cost
+# no minutes on a public repository; the cost is wall-clock, since a link
+# waits for its slower leg. `run:` defaults to bash on both, so both legs run
+# the same commands. Two things in the `pest` job differ by operating system:
+# a Windows runner cannot run service containers, so MySQL is a service on
+# Linux and two Windows-only steps (set up MySQL, create the database) on
+# Windows; and the WordPress download converts `RUNNER_TEMP` with `cygpath`
+# where it exists. The `CI` job itself runs once, on Linux.
 #
 # Two deliberate differences in the local run: every job is always selected
-# rather than chosen from the diff, and Pint checks the whole tree rather than
-# the changed files, which is stricter and needs no diff.
+# rather than chosen from the diff, and `mutate-ignore` names its paths,
+# because the default `tests` walks into a reused slot's
+# `tests/Integration/vendor`, which a cold checkout never has.
 #
 # LOCAL-ONLY (intentionally no job here), named in `local-ci.json` and in
 # `tests/Unit/CiParityTest.php`:
@@ -131,12 +164,13 @@ defaults:
 # those has a counterpart here: `actions/checkout` lands the requested ref, and
 # this workflow file, into a fresh checkout every time.
 #
-# Toolchain pin that must also match: PHP 8.4 (setup-php here, `php` in
-# `local-ci.json`). The shared runner pins no Node version. A pre-commit hook
-# (`.githooks/pre-commit`, auto-wired by composer) blocks a commit that stages
-# only one of these two files; bypass with `--no-verify`.
-# `tests/Unit/CiParityTest.php` asserts the surface mechanically.
-# See `.claude/skills/local-ci/SKILL.md` for the job <-> command map.
+# Toolchain pin that must also match: PHP 8.4 (setup-php here and the setup
+# action's default, `php` in `local-ci.json`). The shared runner pins no Node
+# version. A pre-commit hook (`.githooks/pre-commit`, auto-wired by composer)
+# blocks a commit that stages only one of these two files; bypass with
+# `--no-verify`. `tests/Unit/CiParityTest.php` asserts the surface
+# mechanically. See `.claude/skills/local-ci/SKILL.md` for the job <-> command
+# map.
 #
 # PHP 8.4 FOR THE CHAIN, PHP 8.2 FOR THE FLOOR (#375, superseding D-019's
 # 8.2-everywhere). The unit suite runs on Pest 5, which requires PHP 8.4, and
@@ -217,47 +251,6 @@ jobs:
       - name: Lint every shipped PHP file on the floor
         run: git ls-files -z -- '*.php' ':!:vendor/**' ':!:tests/**' ':!:node_modules/**' | xargs -0 -n1 php -l
 
-  validate:
-    name: Composer validate (composer.lock freshness) on ${{ matrix.os }}
-    strategy:
-      # Every link runs on both operating systems (#25). Not fail-fast, so a
-      # failure on one still reports the other, and `needs:` waits for both legs.
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    # CI chain: runs only after the floor lint passes.
-    needs: lint-floor
-    # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
-    if: vars.RUN_REMOTE_CI != 'false'
-    # Fails when composer.lock no longer matches composer.json — the content-hash
-    # drift a composer.json edit leaves behind when the lock is not refreshed.
-    # Nothing breaks outright, but every `composer install` on every machine then
-    # warns "The lock file is not up to date with the latest changes in
-    # composer.json" forever, and warning noise is how real warnings get ignored.
-    # Dependency-free: Composer reads the two files directly, so this needs no
-    # install of its own.
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up PHP 8.4
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          coverage: none
-          tools: composer:v2
-
-      # `--no-check-publish --no-check-all` scope this to the checks that apply
-      # to a plugin rather than a published package. They do not change pass/fail
-      # — warnings only fail under `--strict` — they change the OUTPUT, dropping
-      # publish-readiness advice against a package that is never published and is
-      # deleted when the migration completes (D-003). Deliberately NOT
-      # `--strict`: it exits non-zero on a clean checkout over warnings this
-      # repo has settled.
-      # PARITY: mirrored by the validate job in local-ci.json.
-      - name: Run composer validate
-        run: composer validate --no-check-publish --no-check-all
-
   floor-functions:
     name: Floor functions (polyfilled calls on PHP 8.2) on ${{ matrix.os }}
     strategy:
@@ -267,9 +260,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    # CI chain: runs only after composer validate passes, so it installs from a
-    # lock that matches composer.json.
-    needs: validate
+    # CI chain: runs only after the floor lint passes. A composer.lock that no
+    # longer matches composer.json fails the called chain's `composer-validate`.
+    needs: lint-floor
     # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
     if: vars.RUN_REMOTE_CI != 'false'
     # A function newer than PHP 8.4 that a polyfill in vendor/ defines passes
@@ -333,35 +326,6 @@ jobs:
       - name: Run the glyph audit
         run: node scripts/check-no-glyphs.mjs
 
-  synced-files:
-    name: Synced files (match the sync manifest) on ${{ matrix.os }}
-    strategy:
-      # Every link runs on both operating systems (#25). Not fail-fast, so a
-      # failure on one still reports the other, and `needs:` waits for both legs.
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    # CI chain: runs only after the glyph audit passes.
-    needs: glyph
-    # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
-    if: vars.RUN_REMOTE_CI != 'false'
-    # A hand edit to a rule or skill the shared sync manages fails here: the
-    # file's sha256 no longer matches `.claude/sync-manifest.jsonc`. Line
-    # endings are normalized before hashing.
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Node 22
-        uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-
-      # No `npm ci`: every import in the script resolves to a node: builtin.
-      # PARITY: mirrored by the synced-files job in local-ci.json.
-      - name: Check the synced files against the manifest
-        run: node .claude/skills/synced-files/scripts/check-synced-files.mjs
-
   handed-back-workflow:
     name: Handed-back workflow (matches its template) on ${{ matrix.os }}
     strategy:
@@ -371,8 +335,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    # CI chain: runs only after the synced-files check passes.
-    needs: synced-files
+    # CI chain: runs only after the glyph audit passes.
+    needs: glyph
     # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
     if: vars.RUN_REMOTE_CI != 'false'
     # `.github/workflows/clear-handed-back.yml` is copied from the
@@ -420,36 +384,6 @@ jobs:
       - name: Check what the GitHub download holds
         run: node .claude/skills/download-archive-check/check-download-archive.mjs
 
-  aggregate-needs:
-    name: Aggregate needs (every job is in CI's needs) on ${{ matrix.os }}
-    strategy:
-      # Every link runs on both operating systems (#25). Not fail-fast, so a
-      # failure on one still reports the other, and `needs:` waits for both legs.
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    # CI chain: runs only after the download-archive check passes.
-    needs: download-archive
-    # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
-    if: vars.RUN_REMOTE_CI != 'false'
-    # Fails, naming the job, when a job in a pull_request workflow is missing
-    # from the `needs:` list of the `CI` job below, so nothing requires it, or
-    # when one of the three names the ruleset requires is reported by no job
-    # (D-105). Allow-list: `.github/aggregate-needs-allow.json`, absent here.
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Node 22
-        uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-
-      # No `npm ci`: every import in the script resolves to a node: builtin.
-      # PARITY: mirrored by the aggregate-needs job in local-ci.json.
-      - name: Check every job is in the CI job's needs
-        run: node .claude/skills/code-quality/scripts/check-aggregate-needs.mjs
-
   spell:
     name: Spell check (cspell) on ${{ matrix.os }}
     strategy:
@@ -459,8 +393,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    # CI chain: runs only after the aggregate-needs check passes.
-    needs: aggregate-needs
+    # CI chain: runs only after the download-archive check passes.
+    needs: download-archive
     # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
     if: vars.RUN_REMOTE_CI != 'false'
     # A blocking gate, not advisory. The dictionary is clean, and cspell was
@@ -483,173 +417,25 @@ jobs:
       - name: Run cspell
         run: npm run spell
 
-  pint:
-    name: Pint (changed files) on ${{ matrix.os }}
-    strategy:
-      # Every link runs on both operating systems (#25). Not fail-fast, so a
-      # failure on one still reports the other, and `needs:` waits for both legs.
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+  checks:
+    # The shared chain (see THE SHARED CHAIN in the header). A called workflow
+    # takes no `strategy:` or `runs-on:` here: its legs are its inputs.
     # CI chain: runs only after the spell check passes. Pint MUST come before
-    # Rector — the two rewrite the same files, and rector.php leaves import
-    # removal to Pint alone.
+    # Rector, and the called chain orders them so.
     needs: spell
     # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
     if: vars.RUN_REMOTE_CI != 'false'
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          # The changed-file diff below resolves the base ref, so the full
-          # history has to be present.
-          fetch-depth: 0
-
-      - name: Set up PHP 8.4
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          coverage: none
-          tools: composer:v2
-
-      - name: Determine Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config --global cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Composer packages
-        uses: actions/cache@v6
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
-
-      # PARITY: mirrored by the pint job in local-ci.json, which checks the
-      # whole tree rather than this diff-filter=ACMR list of changed files.
-      - name: Determine changed PHP files
-        id: changed
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base="origin/${{ github.base_ref }}"
-          else
-            base="HEAD~1"
-          fi
-          files=$(git diff --name-only --diff-filter=ACMR "$base"...HEAD -- '*.php' | tr '\n' ' ')
-          echo "files=$files" >> "$GITHUB_OUTPUT"
-          echo "Changed PHP files: ${files:-<none>}"
-
-      # PARITY: mirrored by the pint job in local-ci.json. The list goes as one
-      # argv: the host allows a command line in the megabytes and this repo is a
-      # few dozen PHP files, so it does not chunk.
-      - name: Run Pint on changed files
-        if: steps.changed.outputs.files != ''
-        run: vendor/bin/pint --test ${{ steps.changed.outputs.files }}
-
-      - name: Skip notice
-        if: steps.changed.outputs.files == ''
-        run: echo "No PHP files changed in this PR/push; skipping Pint."
-
-  rector:
-    name: Rector (gating profile) on ${{ matrix.os }}
-    strategy:
-      # Every link runs on both operating systems (#25). Not fail-fast, so a
-      # failure on one still reports the other, and `needs:` waits for both legs.
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    # CI chain: runs only after Pint passes.
-    needs: pint
-    # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
-    if: vars.RUN_REMOTE_CI != 'false'
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up PHP 8.4
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          coverage: none
-          tools: composer:v2
-
-      - name: Determine Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config --global cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Composer packages
-        uses: actions/cache@v6
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
-
-      # PARITY: mirrored by the rector job in local-ci.json (same gating
-      # profile, same --dry-run). Locally the slot is reused, so that job passes
-      # --clear-cache to start cold as this step does.
-      #
-      # Rector's file cache does NOT key on the active rule set, so a warm cache
-      # written by the sweep profile makes a later gating run silently
-      # UNDER-report, and under-reporting is a false GREEN. This repo carries two
-      # profiles over one rule corpus (rector.php and rector-sweep.php), so since
-      # #366 rector.php gives each profile its own cache directory under
-      # `sys_get_temp_dir()`. The private temp dir here is kept as the second
-      # guard it always was: a fresh dir starts empty, so no `--clear-cache`,
-      # which would race a concurrent Rector, is needed.
-      # PHP reads TMPDIR on Linux; TMP/TEMP are set too so the one command is
-      # portable.
-      - name: Run Rector (gating profile, dry-run)
-        run: |
-          RECTOR_TMP="$(mktemp -d)"
-          TMPDIR="$RECTOR_TMP" TMP="$RECTOR_TMP" TEMP="$RECTOR_TMP" \
-            vendor/bin/rector --dry-run --no-progress-bar
-
-  phpstan:
-    name: PHPStan (level max) on ${{ matrix.os }}
-    strategy:
-      # Every link runs on both operating systems (#25). Not fail-fast, so a
-      # failure on one still reports the other, and `needs:` waits for both legs.
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    # CI chain: runs only after Rector passes.
-    needs: rector
-    # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
-    if: vars.RUN_REMOTE_CI != 'false'
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up PHP 8.4
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          coverage: none
-          tools: composer:v2
-
-      - name: Determine Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config --global cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Composer packages
-        uses: actions/cache@v6
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
-
-      # PARITY: mirrored by the phpstan job in local-ci.json. `level: max`
-      # with bleedingEdge; phpstan.neon.dist supplies the paths, the WordPress
-      # stubs and the 8.2 `phpVersion` floor.
-      - name: Run PHPStan
-        run: composer stan
+    # PARITY: mirrored by the validate, synced-files, no-emoji, aggregate-needs,
+    # pint, rector, phpstan and mutate-ignore jobs in local-ci.json, one per
+    # called job that runs, in that order. `windows-jobs` names each of them.
+    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.4.0
+    with:
+      # Linux and Windows for every called job that runs, and no macOS (D-108).
+      windows-jobs: composer-validate synced-files no-emoji aggregate-needs pint rector phpstan mutate-ignore
+      # Run below as this repository's own `pest` job, with MySQL and WordPress.
+      pest: false
+      # `composer mutate` needs the WordPress suite, which the called job cannot boot.
+      mutate: false
 
   mutate-ignore-breadth:
     name: Mutation annotation breadth on ${{ matrix.os }}
@@ -660,8 +446,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    # CI chain: runs only after PHPStan passes.
-    needs: phpstan
+    # CI chain: runs only after the called chain passes.
+    needs: checks
     # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
     if: vars.RUN_REMOTE_CI != 'false'
     # Measures each `@pest-mutate-ignore` with the installed pest-plugin-mutate
@@ -892,17 +678,12 @@ jobs:
     needs:
       - load-guard
       - lint-floor
-      - validate
       - floor-functions
       - glyph
-      - synced-files
       - handed-back-workflow
       - download-archive
-      - aggregate-needs
       - spell
-      - pint
-      - rector
-      - phpstan
+      - checks
       - mutate-ignore-breadth
       - pest
       - node-test
