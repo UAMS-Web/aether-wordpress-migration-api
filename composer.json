@@ -83,6 +83,7 @@
         "stan": "phpstan analyze --no-progress --memory-limit=2G",
         "refactor": "rector",
         "refactor:sweep": "rector --config=rector-sweep.php",
+        "test:pint": "pint --test",
         "test:refactor": "rector --dry-run",
         "test:refactor:sweep": "rector --dry-run --config=rector-sweep.php",
         "ci": [
