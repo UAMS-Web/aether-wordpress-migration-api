@@ -128,7 +128,8 @@ defaults:
 # leg and no macOS leg. `needs:` names a job id, so each link waits for both
 # legs of the one before it, and `CI` reads each job's combined result, which
 # is `success` only when both legs succeeded. `tests/Unit/CiParityTest.php`
-# fails when a plain job drops a leg or a called job is missing from
+# fails when a plain job drops a leg, when the call's tag moves without the
+# test's list of called jobs, or when a job on that list is missing from
 # `windows-jobs`. The Windows leg is there to catch what only Windows does
 # (paths, command-line and filter limits, console behavior) on the pull
 # request rather than on the next Windows workstation. Standard runners cost
@@ -141,9 +142,13 @@ defaults:
 # where it exists. The `CI` job itself runs once, on Linux.
 #
 # Two deliberate differences in the local run: every job is always selected
-# rather than chosen from the diff, and `mutate-ignore` names its paths,
-# because the default `tests` walks into a reused slot's
-# `tests/Integration/vendor`, which a cold checkout never has.
+# rather than chosen from the diff, and `mutate-ignore` names its paths. The
+# called job passes none, so it reads whichever of `app`, `src` and `tests`
+# exist, which here is `tests` alone, and every annotation in this repository
+# is under `includes/`. Locally the paths add `includes` and leave out the
+# `tests/Integration/vendor` a reused slot has. Remotely, `includes` is read
+# by `mutate-ignore-breadth`, which fails on an annotation that removes no
+# mutant or more than one per mutator it names.
 #
 # LOCAL-ONLY (intentionally no job here), named in `local-ci.json` and in
 # `tests/Unit/CiParityTest.php`:

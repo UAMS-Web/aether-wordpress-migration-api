@@ -99,8 +99,21 @@ function ciCallJob(): string
 }
 
 /**
- * The called chain's jobs that run, each with the local job that mirrors it, in
- * the order the local runner runs them.
+ * The release tag of UAMS-Web/uams-ci-workflows the call pins.
+ *
+ * ciCalledJobs() was read from the workflow at this tag. Moving the tag in
+ * ci.yml fails the call's test until this moves too, which is the point at
+ * which the list below is read again against the new tag: a job the new tag
+ * adds would otherwise run on Linux alone, missing from `windows-jobs`.
+ */
+function ciCalledChainTag(): string
+{
+    return 'v0.4.0';
+}
+
+/**
+ * The called chain's jobs that run at ciCalledChainTag(), each with the local
+ * job that mirrors it, in the order the local runner runs them.
  *
  * The chain's `pest` and `mutate` jobs are switched off by the call's inputs and
  * are not listed: this repository runs its Pest suites as its own `pest` job,
@@ -471,7 +484,7 @@ it('calls the shared chain at a release tag, on Linux and Windows, with its Pest
     $calledJobs = array_keys(ciCalledJobs());
     sort($calledJobs);
 
-    expect($body)->toMatch('#^    uses: UAMS-Web/uams-ci-workflows/\.github/workflows/ci\.yml@v\d+\.\d+\.\d+$#m')
+    expect($body)->toMatch('#^    uses: UAMS-Web/uams-ci-workflows/\.github/workflows/ci\.yml@'.preg_quote(ciCalledChainTag(), '#').'$#m')
         ->and($body)->toMatch('/^      pest: false$/m')
         ->and($body)->toMatch('/^      mutate: false$/m')
         ->and($body)->not->toMatch('/^      (all-platform-jobs|linux-only|encoding-guard|vitest|vite-build|mutation-smoke):/m')

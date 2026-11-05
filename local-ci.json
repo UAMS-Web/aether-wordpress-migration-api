@@ -111,7 +111,7 @@
     },
     {
       "name": "mutate-ignore",
-      "_note": "Fails naming a bare or inert @pest-mutate-ignore annotation; the called chain's mutate-ignore job runs it (#49). The paths are named because the default `tests` walks into tests/Integration/vendor, which a reused slot has and a cold checkout does not, and whose pest-plugin-mutate carries markers of its own. No vendor requirement, for the reason the spell job gives.",
+      "_note": "Fails naming a bare or inert @pest-mutate-ignore annotation; the called chain's mutate-ignore job runs it (#49). The paths are named for two reasons: the called job passes none, so it reads `tests` alone here while every annotation in this repository is under includes/, which mutate-ignore-breadth reads remotely; and the default `tests` walks into tests/Integration/vendor, which a reused slot has and a cold checkout does not, and whose pest-plugin-mutate carries markers of its own. No vendor requirement, for the reason the spell job gives.",
       "run": "php .claude/skills/pest-testing/scripts/check-mutate-ignore.php includes tests/Unit tests/Support tests/Integration/Feature tests/Integration/Mutate",
       "always": true
     },
