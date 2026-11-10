@@ -138,6 +138,7 @@ pecl
 pestphp
 pgrep
 phar
+phpcs
 phpize
 phpstan
 phpunit
