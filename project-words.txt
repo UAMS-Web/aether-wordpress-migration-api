@@ -130,6 +130,7 @@ oembed
 oneline
 optimiser
 paratest
+passmore
 passthru
 pathext
 pcov

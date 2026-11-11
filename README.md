@@ -158,3 +158,12 @@ The repository is `UAMS-Web/aether-wordpress-migration-api`, and the old `UAMS-W
 - **Unchanged:** the plugin file and folder name `uamswp-migration-api`, the text domain, the REST namespace `uamswp-migration/v1`, the `UAMSWP_MIGRATION_API_*` constants and the settings page slug. A WordPress install keys an active plugin by its folder and main file, so those stay.
 - **A checkout** points at the new address with `git remote set-url origin https://github.com/UAMS-Web/aether-wordpress-migration-api.git`.
 - **A site deployed with WP Pusher** keeps pointing at the old repository name, which GitHub redirects, and keeps its plugin folder. After the first release under the new name, check that one site updates in place.
+
+## Credits
+
+Developed and maintained by UAMS Web Services.
+
+Developers:
+
+- Josh Daugherty
+- Brent Passmore
