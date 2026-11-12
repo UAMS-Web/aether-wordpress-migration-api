@@ -55,6 +55,7 @@ $wordpress = rtrim((string) (getenv('WP_TESTS_ABSPATH') ?: dirname(__DIR__, 5)),
  * it is the directory the checkout sits in; for a checkout elsewhere it is the
  * one under `WP_TESTS_ABSPATH`, so such a run still finds ACF PRO, Gravity
  * Forms and the rest instead of quietly skipping their tests (#60, D-113).
+ * "The surrounding install" in the comments below means this install.
  */
 $plugins = $wordpress.'wp-content/plugins';
 $testDatabase = (string) (getenv('WP_TESTS_DB_NAME') ?: 'uamswp_migration_api_tests');
@@ -142,7 +143,7 @@ require_once $wpPhpunit.'/includes/functions.php';
  * a real ACF rather than a stand-in (D-021, applied one layer out). Two copies
  * are available and they are not equivalent:
  *
- *   PRO  — the sibling plugin directory of the install this checkout sits in.
+ *   PRO  — the plugins directory of the install the suite boots (`$plugins`).
  *          The version production runs, and the only one with `repeater`,
  *          `flexible_content` and `clone` — the containers whose recursion is
  *          the entire mechanism of #21. Not installable on a CI runner: it is
