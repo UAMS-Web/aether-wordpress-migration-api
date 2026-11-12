@@ -119,6 +119,8 @@ ACF comes with `composer setup:integration` — the free copy, pinned to the sam
 
 That is the whole setup. WordPress is located from this checkout's own position inside `wp-content/plugins/`, and the database defaults suit a stock Herd MySQL, so there is nothing machine-specific to configure. Override any of it with `WP_TESTS_ABSPATH`, `WP_TESTS_DB_NAME`, `WP_TESTS_DB_USER`, `WP_TESTS_DB_PASSWORD` or `WP_TESTS_DB_HOST`.
 
+**A checkout outside a WordPress install** works too, given a WordPress root on the same machine to boot (D-113). Point the suites at it with `WP_TESTS_ABSPATH=/path/to/wordpress composer test`, and the local CI chain with `LOCAL_CI_WP_ABSPATH=/path/to/wordpress npm run ci:local -- --branch <branch>`. The chain creates its slot beside the checkout and installs that slot's dependencies itself. Without the variable, the chain's `pest` job stops and names it.
+
 **The test database is dropped and rebuilt on every run.** `tests/Integration/bootstrap.php` refuses to start if the name matches the database the surrounding WordPress install uses, because the installer drops every table it finds with no prompt and no dry run.
 
 | Command | What it runs |

@@ -48,6 +48,16 @@ if (! is_readable(__DIR__.'/vendor/autoload.php')) {
 require_once __DIR__.'/vendor/autoload.php';
 
 $wordpress = rtrim((string) (getenv('WP_TESTS_ABSPATH') ?: dirname(__DIR__, 5)), '/').'/';
+
+/*
+ * The plugins directory of the install being booted, where the optional and
+ * paid plugins below are looked for. For a checkout inside `wp-content/plugins/`
+ * it is the directory the checkout sits in; for a checkout elsewhere it is the
+ * one under `WP_TESTS_ABSPATH`, so such a run still finds ACF PRO, Gravity
+ * Forms and the rest instead of quietly skipping their tests (#60, D-113).
+ * "The surrounding install" in the comments below means this install.
+ */
+$plugins = $wordpress.'wp-content/plugins';
 $testDatabase = (string) (getenv('WP_TESTS_DB_NAME') ?: 'uamswp_migration_api_tests');
 
 /*
@@ -133,7 +143,7 @@ require_once $wpPhpunit.'/includes/functions.php';
  * a real ACF rather than a stand-in (D-021, applied one layer out). Two copies
  * are available and they are not equivalent:
  *
- *   PRO  — the sibling plugin directory of the install this checkout sits in.
+ *   PRO  — the plugins directory of the install the suite boots (`$plugins`).
  *          The version production runs, and the only one with `repeater`,
  *          `flexible_content` and `clone` — the containers whose recursion is
  *          the entire mechanism of #21. Not installable on a CI runner: it is
@@ -146,7 +156,7 @@ require_once $wpPhpunit.'/includes/functions.php';
  * refuses a run that loaded free while PRO sat on disk — the one way this could
  * quietly lose the coverage that matters.
  */
-$acfPro = \dirname(__DIR__, 3).'/advanced-custom-fields-pro/acf.php';
+$acfPro = $plugins.'/advanced-custom-fields-pro/acf.php';
 $acfFree = __DIR__.'/vendor/wpackagist-plugin/advanced-custom-fields/acf.php';
 
 define('UAMSWP_MIGRATION_API_TESTS_ACF_PRO_ON_DISK', is_readable($acfPro));
@@ -183,7 +193,7 @@ define('UAMSWP_MIGRATION_API_TESTS_ACF', is_readable($acfPro) ? 'pro' : 'free');
  * as it did before. `tests/Integration/Feature/ACF/CustomTableDivergenceTest.php` points it
  * at a fixture of its own for the one test that needs it.
  */
-$cdt = \dirname(__DIR__, 3).'/acf-custom-database-tables/acf-custom-database-tables.php';
+$cdt = $plugins.'/acf-custom-database-tables/acf-custom-database-tables.php';
 
 define('UAMSWP_MIGRATION_API_TESTS_CDT', is_readable($cdt));
 
@@ -238,7 +248,7 @@ if (is_readable($cdt)) {
  * reds a run that had it on disk and failed to load it, so the skip cannot
  * become silently permanent.
  */
-$gravityForms = \dirname(__DIR__, 3).'/gravityforms/gravityforms.php';
+$gravityForms = $plugins.'/gravityforms/gravityforms.php';
 
 define('UAMSWP_MIGRATION_API_TESTS_GRAVITY_FORMS_ON_DISK', is_readable($gravityForms));
 
@@ -282,8 +292,8 @@ define(
  * Loaded from disk rather than requiring activation, exactly as ACF and Gravity
  * Forms are — the bootstrap never reads `active_plugins`.
  */
-$formidable = \dirname(__DIR__, 3).'/formidable/formidable.php';
-$formidablePro = \dirname(__DIR__, 3).'/formidable-pro/formidable-pro.php';
+$formidable = $plugins.'/formidable/formidable.php';
+$formidablePro = $plugins.'/formidable-pro/formidable-pro.php';
 
 define('UAMSWP_MIGRATION_API_TESTS_FORMIDABLE_ON_DISK', is_readable($formidable));
 define('UAMSWP_MIGRATION_API_TESTS_FORMIDABLE_PRO_ON_DISK', is_readable($formidablePro));
@@ -301,7 +311,7 @@ define('UAMSWP_MIGRATION_API_TESTS_FORMIDABLE_PRO_ON_DISK', is_readable($formida
  * The surrounding install is checked first anyway: a developer who has it
  * activated there should be testing against the copy their site actually runs.
  */
-$ninjaInstalled = \dirname(__DIR__, 3).'/ninja-forms/ninja-forms.php';
+$ninjaInstalled = $plugins.'/ninja-forms/ninja-forms.php';
 $ninjaVendored = __DIR__.'/vendor/wpackagist-plugin/ninja-forms/ninja-forms.php';
 $ninja = is_readable($ninjaInstalled) ? $ninjaInstalled : $ninjaVendored;
 

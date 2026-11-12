@@ -25,11 +25,12 @@ declare(strict_types=1);
  * does, first: without it the run dies later inside the WordPress installer
  * with an error that names neither the database nor the fix.
  *
- * WordPress is located from the PRIMARY checkout, the one inside
- * `wp-content/plugins/`, and passed to every suite as `WP_TESTS_ABSPATH`, so the
- * slot can sit anywhere `--worktree-path` puts it and a value exported in the
- * caller's shell cannot point the suite at another install. Override with
- * `LOCAL_CI_WP_ABSPATH`.
+ * WordPress is located from the PRIMARY checkout, three levels above it when
+ * it sits in `wp-content/plugins/`, and passed to every suite as
+ * `WP_TESTS_ABSPATH`, so the slot can sit anywhere `--worktree-path` puts it and
+ * a value exported in the caller's shell cannot point the suite at another
+ * install. A primary checkout outside a WordPress install names the WordPress
+ * root in `LOCAL_CI_WP_ABSPATH`, which takes precedence (#60, D-113).
  *
  * Runs under whatever PHP started it, which under the runner is the PHP
  * local-ci.json names, and starts each suite with that same binary.
@@ -71,7 +72,7 @@ if (! is_string($wordpress) || $wordpress === '') {
 $wordpress = rtrim($wordpress, '/\\');
 
 if (! is_file($wordpress.'/wp-settings.php')) {
-    fwrite(STDERR, "The Integration suite needs a WordPress install, and none was found at {$wordpress}. The primary checkout must sit in wp-content/plugins/, or set LOCAL_CI_WP_ABSPATH to the WordPress root.\n");
+    fwrite(STDERR, "The Integration suite needs a WordPress install, and none was found at {$wordpress}. Set LOCAL_CI_WP_ABSPATH to a WordPress root, or keep the primary checkout in that install's wp-content/plugins/.\n");
     exit(1);
 }
 
