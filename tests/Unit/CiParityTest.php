@@ -108,7 +108,7 @@ function ciCallJob(): string
  */
 function ciCalledChainTag(): string
 {
-    return 'v0.4.0';
+    return 'v0.13.0';
 }
 
 /**
@@ -119,6 +119,10 @@ function ciCalledChainTag(): string
  * are not listed: this repository runs its Pest suites as its own `pest` job,
  * and `composer mutate` is outside the gate. The chain's optional jobs are off
  * unless an input turns them on, and the call turns none on.
+ *
+ * From v0.13.0 the chain also skips its `mutate-ignore` job under
+ * `mutate: false` unless the call passes `mutate-ignore: true`, which this call
+ * does not (#81). The local `mutate-ignore` job still runs it.
  *
  * @return array<string, string>
  */
