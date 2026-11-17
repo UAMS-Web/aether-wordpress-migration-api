@@ -1,5 +1,5 @@
 {
-    "name": "uamswp-migration-api",
+    "name": "aether-wordpress-migration-api",
     "private": true,
     "scripts": {
         "spell": "cspell --no-progress --dot \"**/*.{php,js,mjs,md,yml,yaml,json}\" \".github/**\"",

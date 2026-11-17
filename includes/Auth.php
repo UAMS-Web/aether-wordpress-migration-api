@@ -106,7 +106,7 @@ final class Auth
         if (! is_user_logged_in()) {
             return new WP_Error(
                 'uamswp_migration_api_unauthorized',
-                __('Authentication required.', 'uamswp-migration-api'),
+                __('Authentication required.', 'aether-wordpress-migration-api'),
                 ['status' => 401]
             );
         }
@@ -114,7 +114,7 @@ final class Auth
         if (! current_user_can(self::capability())) {
             return new WP_Error(
                 'uamswp_migration_api_forbidden',
-                __('You do not have permission to read migration data for this site.', 'uamswp-migration-api'),
+                __('You do not have permission to read migration data for this site.', 'aether-wordpress-migration-api'),
                 ['status' => 403]
             );
         }

@@ -229,7 +229,7 @@ final class RedirectsController extends Controller
                     'uamswp_migration_api_redirect_tables_missing',
                     sprintf(
                         /* translators: 1: plugin name, 2: site id, 3: table name. */
-                        __('%1$s is active on site %2$d, but its table %3$s does not exist there, so its rules cannot be read.', 'uamswp-migration-api'),
+                        __('%1$s is active on site %2$d, but its table %3$s does not exist there, so its rules cannot be read.', 'aether-wordpress-migration-api'),
                         $plugin,
                         get_current_blog_id(),
                         $name
@@ -268,7 +268,7 @@ final class RedirectsController extends Controller
             'uamswp_migration_api_redirect_read_failed',
             sprintf(
                 /* translators: 1: plugin name, 2: table name, 3: site id. */
-                __('%1$s could not read %2$s on site %3$d, so its rules are not served rather than served incomplete.', 'uamswp-migration-api'),
+                __('%1$s could not read %2$s on site %3$d, so its rules are not served rather than served incomplete.', 'aether-wordpress-migration-api'),
                 $plugin,
                 ($wpdb instanceof \wpdb ? $wpdb->prefix : '').$table,
                 get_current_blog_id()
@@ -415,13 +415,13 @@ final class RedirectsController extends Controller
             $site > 0
                 ? sprintf(
                     /* translators: 1: plugin name, 2: site id. */
-                    __('%1$s is not loaded in the process handling this request, so its rules on site %2$d cannot be read here even where `/sites` reports it active, because plugins load for the site that booted the request: ask site %2$d through its own REST root.', 'uamswp-migration-api'),
+                    __('%1$s is not loaded in the process handling this request, so its rules on site %2$d cannot be read here even where `/sites` reports it active, because plugins load for the site that booted the request: ask site %2$d through its own REST root.', 'aether-wordpress-migration-api'),
                     $plugin,
                     $site
                 )
                 : sprintf(
                     /* translators: %s: plugin name. */
-                    __('%s is not loaded in the process handling this request.', 'uamswp-migration-api'),
+                    __('%s is not loaded in the process handling this request.', 'aether-wordpress-migration-api'),
                     $plugin
                 ),
             ['status' => 404]
@@ -437,7 +437,7 @@ final class RedirectsController extends Controller
             'uamswp_migration_api_redirect_plugin_not_active',
             sprintf(
                 /* translators: 1: plugin name, 2: site id. */
-                __('%1$s is not active on site %2$d.', 'uamswp-migration-api'),
+                __('%1$s is not active on site %2$d.', 'aether-wordpress-migration-api'),
                 $plugin,
                 get_current_blog_id()
             ),

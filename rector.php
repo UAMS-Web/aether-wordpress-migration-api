@@ -74,7 +74,7 @@ $sweepOnlyRules = [
 // already-active plugin — where the alternative to this code is a fatal error
 // instead of a notice. Path-scoped rather than blanket-skipped so the rules
 // still apply everywhere else.
-$guardFile = [__DIR__.'/uamswp-migration-api.php'];
+$guardFile = [__DIR__.'/aether-wordpress-migration-api.php'];
 
 $neverRules = [
     UnwrapFutureCompatibleIfPhpVersionRector::class => $guardFile,

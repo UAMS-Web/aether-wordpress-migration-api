@@ -364,6 +364,13 @@ return [
      * always-on signal the subset comparison exists to avoid, arriving by a
      * different door.
      *
+     * `aether-wordpress-migration-api` is in the list beside it for the same
+     * reason: it is the folder name the plugin takes from #93 on, and a site
+     * whose install has moved to it reports that slug instead. The old
+     * `uamswp-migration-api` stays until every install has moved to the new
+     * folder (#94), since a site still on the old folder reports only the
+     * old slug.
+     *
      * Twelve slugs were added on 2026-09-28 after `communications.uams.edu/web`
      * reported them as `added` and the denylist was audited against that
      * site's full options table (#273): the six Formidable slugs,
@@ -392,6 +399,7 @@ return [
         'acf-maskfield',
         'admin-columns-pro',
         'advanced-custom-fields-pro',
+        'aether-wordpress-migration-api',
         'ajax-search-pro',
         'better-image-sizes',
         'beyond-multisite',

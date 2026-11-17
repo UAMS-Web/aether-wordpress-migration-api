@@ -136,7 +136,7 @@ describe('routing', () => {
     })
 
     it('never treats a change touching what ships as tooling', () => {
-        for (const path of ['includes/Auth.php', 'config/defaults.php', 'uamswp-migration-api.php']) {
+        for (const path of ['includes/Auth.php', 'config/defaults.php', 'aether-wordpress-migration-api.php']) {
             assert.equal(pathsAreTooling(['tests/Feature/AuthTest.php', path]), false, path)
         }
     })
@@ -154,12 +154,12 @@ describe('routing', () => {
     describe('the plugin header (#385)', () => {
         const bump = [
             '@@ -4,7 +4,7 @@',
-            '  * Plugin Name:       UAMSWP Migration API',
+            '  * Plugin Name:       Aether WordPress Migration API',
             '- * Version:           0.5.1',
             '+ * Version:           0.6.0',
             '  * Requires at least: 6.4',
         ].join('\n')
-        const header = (patch) => ({ filename: 'uamswp-migration-api.php', patch })
+        const header = (patch) => ({ filename: 'aether-wordpress-migration-api.php', patch })
 
         it('routes a change confined to the Version: line to maintenance', () => {
             assert.equal(isVersionOnlyPatch(bump), true)
@@ -177,7 +177,7 @@ describe('routing', () => {
 
         it('reads a header with no patch, or a bare path, as product work', () => {
             assert.equal(bucket('Serve a release', { paths: [header(undefined)] }), 'new')
-            assert.equal(bucket('Serve a release', { paths: ['uamswp-migration-api.php'] }), 'new')
+            assert.equal(bucket('Serve a release', { paths: ['aether-wordpress-migration-api.php'] }), 'new')
             assert.equal(isVersionOnlyPatch(''), false)
         })
     })
@@ -267,7 +267,7 @@ describe('the files read', () => {
         // Every patch of a large sync overflows spawnSync's buffer; ask for the header's only.
         const jq = ok.calls[0].at(-1)
 
-        assert.match(jq, /\.filename == "uamswp-migration-api\.php" then \.patch else null/)
+        assert.match(jq, /\.filename == "aether-wordpress-migration-api\.php" then \.patch else null/)
 
         const bad = fakeExec({ 'pulls/9/files': `${line({ filename: '.claude/x.md', patch: '+x' })}\nnot json\n` })
 

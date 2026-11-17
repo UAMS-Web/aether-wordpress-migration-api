@@ -79,7 +79,7 @@ These are load-bearing. Breaking one produces a well-formed response full of wro
 ## Architecture
 
 ```
-uamswp-migration-api.php   Plugin header, PHP 8.2 guard, hand-rolled autoloader
+aether-wordpress-migration-api.php   Plugin header, PHP 8.2 guard, hand-rolled autoloader
 .github/workflows/ci.yml   The CI chain on Linux and Windows: ten plain jobs and a call to the shared chain (D-112), and the `CI` check over it
 .github/actions/setup/action.yml  The setup action the shared chain's jobs run
 .github/workflows/clear-handed-back.yml  Removes `handed-back` on a push (#330)

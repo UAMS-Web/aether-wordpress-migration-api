@@ -200,7 +200,7 @@ final class Site
         if (! is_multisite()) {
             return new WP_Error(
                 'uamswp_migration_api_not_multisite',
-                __('This installation is not a multisite network, so the site parameter is not supported.', 'uamswp-migration-api'),
+                __('This installation is not a multisite network, so the site parameter is not supported.', 'aether-wordpress-migration-api'),
                 ['status' => 400]
             );
         }
@@ -212,7 +212,7 @@ final class Site
         if ($site_id < 1) {
             return new WP_Error(
                 'uamswp_migration_api_invalid_site',
-                __('The site parameter must be a positive integer blog id.', 'uamswp-migration-api'),
+                __('The site parameter must be a positive integer blog id.', 'aether-wordpress-migration-api'),
                 ['status' => 400]
             );
         }
@@ -226,7 +226,7 @@ final class Site
         if (! $site instanceof \WP_Site) {
             return new WP_Error(
                 'uamswp_migration_api_unknown_site',
-                __('No such site in this network.', 'uamswp-migration-api'),
+                __('No such site in this network.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -238,7 +238,7 @@ final class Site
                     'uamswp_migration_api_unavailable_site',
                     sprintf(
                         /* translators: %s: site state, one of archived, deleted, spam. */
-                        __('That site is marked %s and cannot be read.', 'uamswp-migration-api'),
+                        __('That site is marked %s and cannot be read.', 'aether-wordpress-migration-api'),
                         $flag
                     ),
                     ['status' => 409]
@@ -401,7 +401,7 @@ final class Site
     public static function param(): array
     {
         return [
-            'description' => __('Blog id to read, for network installs. Defaults to the site handling the request.', 'uamswp-migration-api'),
+            'description' => __('Blog id to read, for network installs. Defaults to the site handling the request.', 'aether-wordpress-migration-api'),
             'type' => 'integer',
             'minimum' => 1,
             'sanitize_callback' => 'absint',

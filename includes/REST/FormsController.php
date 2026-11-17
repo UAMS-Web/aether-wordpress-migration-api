@@ -143,7 +143,7 @@ final class FormsController extends Controller
         if (! \is_array($form) || self::isTrashed($form)) {
             return new WP_Error(
                 'uamswp_migration_api_not_found',
-                __('No Gravity Forms form with that id.', 'uamswp-migration-api'),
+                __('No Gravity Forms form with that id.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -203,7 +203,7 @@ final class FormsController extends Controller
         if (! \is_array($form) || self::isTrashed($form)) {
             return new WP_Error(
                 'uamswp_migration_api_not_found',
-                __('No Gravity Forms form with that id.', 'uamswp-migration-api'),
+                __('No Gravity Forms form with that id.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -394,7 +394,7 @@ final class FormsController extends Controller
             'uamswp_migration_api_feed_query_failed',
             sprintf(
                 /* translators: %s: the underlying GFAPI error message. */
-                __('Reading Gravity Forms add-on feeds failed: %s', 'uamswp-migration-api'),
+                __('Reading Gravity Forms add-on feeds failed: %s', 'aether-wordpress-migration-api'),
                 $error->get_error_message()
             ),
             ['status' => 500]
@@ -459,7 +459,7 @@ final class FormsController extends Controller
         if (! $form instanceof stdClass) {
             return new WP_Error(
                 'uamswp_migration_api_not_found',
-                __('No Formidable Forms form with that id.', 'uamswp-migration-api'),
+                __('No Formidable Forms form with that id.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -506,7 +506,7 @@ final class FormsController extends Controller
         if (! \is_object($form)) {
             return new WP_Error(
                 'uamswp_migration_api_not_found',
-                __('No Ninja Forms form with that id.', 'uamswp-migration-api'),
+                __('No Ninja Forms form with that id.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -855,13 +855,13 @@ final class FormsController extends Controller
             $site > 0
                 ? sprintf(
                     /* translators: 1: plugin name, 2: site id, 3: site id. */
-                    __('%1$s is not loaded in the process handling this request. Whether it is active on site %2$d cannot be answered here, because plugins load for the site that booted the request — ask site %2$d through its own REST root.', 'uamswp-migration-api'),
+                    __('%1$s is not loaded in the process handling this request. Whether it is active on site %2$d cannot be answered here, because plugins load for the site that booted the request — ask site %2$d through its own REST root.', 'aether-wordpress-migration-api'),
                     $plugin,
                     $site
                 )
                 : sprintf(
                     /* translators: %s: plugin name. */
-                    __('%s is not active on this site.', 'uamswp-migration-api'),
+                    __('%s is not active on this site.', 'aether-wordpress-migration-api'),
                     $plugin
                 ),
             ['status' => 404]

@@ -149,7 +149,7 @@ final class TermsController extends Controller
         if (! $term instanceof WP_Term) {
             return new WP_Error(
                 'uamswp_migration_api_not_found',
-                __('No term of that taxonomy with that id.', 'uamswp-migration-api'),
+                __('No term of that taxonomy with that id.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -185,7 +185,7 @@ final class TermsController extends Controller
         if (! \in_array($taxonomy, Config::strings('taxonomies'), true)) {
             return new WP_Error(
                 'uamswp_migration_api_unknown_taxonomy',
-                __('That taxonomy is not served here.', 'uamswp-migration-api'),
+                __('That taxonomy is not served here.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -198,13 +198,13 @@ final class TermsController extends Controller
                 $site > 0
                     ? sprintf(
                         /* translators: 1: taxonomy name, 2: site id. */
-                        __('`%1$s` is served by this deployment but is not registered in the process handling this request. Request it from site %2$d\'s own REST root.', 'uamswp-migration-api'),
+                        __('`%1$s` is served by this deployment but is not registered in the process handling this request. Request it from site %2$d\'s own REST root.', 'aether-wordpress-migration-api'),
                         $taxonomy,
                         $site
                     )
                     : sprintf(
                         /* translators: %s: taxonomy name. */
-                        __('`%s` is served by this deployment but is not registered on this site.', 'uamswp-migration-api'),
+                        __('`%s` is served by this deployment but is not registered on this site.', 'aether-wordpress-migration-api'),
                         $taxonomy
                     ),
                 ['status' => 404]
