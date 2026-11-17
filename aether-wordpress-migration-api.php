@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name:       UAMSWP Migration API
+ * Plugin Name:       Aether WordPress Migration API
  * Plugin URI:        https://github.com/UAMS-Web/aether-wordpress-migration-api
  * Description:       Read-only migration API serving raw, current WordPress content to the Statamic importer. Temporary — remove when the migration completes.
  * Version:           0.8.9
@@ -11,7 +11,7 @@
  * Author URI:        https://communications.uams.edu/web/
  * License:           GPLv2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       uamswp-migration-api
+ * Text Domain:       aether-wordpress-migration-api
  * Network:           true
  */
 
@@ -38,7 +38,7 @@ if (version_compare(PHP_VERSION, '8.2', '<')) {
                 esc_html(
                     sprintf(
                         /* translators: %s: current PHP version. */
-                        __('UAMSWP Migration API requires PHP 8.2 or later. This site runs %s, so the plugin is inactive.', 'uamswp-migration-api'),
+                        __('Aether WordPress Migration API requires PHP 8.2 or later. This site runs %s, so the plugin is inactive.', 'aether-wordpress-migration-api'),
                         PHP_VERSION
                     )
                 )

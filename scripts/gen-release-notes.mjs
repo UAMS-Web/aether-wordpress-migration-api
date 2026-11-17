@@ -204,7 +204,7 @@ export const TOOLING_ROOTS = new Set([
 
 // The plugin header ships, so it is not a tooling root. A change confined to its
 // `Version:` line is a release bump, though, and serves no different response.
-export const PLUGIN_HEADER = 'uamswp-migration-api.php'
+export const PLUGIN_HEADER = 'aether-wordpress-migration-api.php'
 
 const VERSION_LINE = /^\s*\*\s*Version:\s*\S+\s*$/
 

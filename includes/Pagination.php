@@ -160,13 +160,13 @@ final class Pagination
     {
         return [
             'page' => [
-                'description' => __('Page of results to return, 1-based.', 'uamswp-migration-api'),
+                'description' => __('Page of results to return, 1-based.', 'aether-wordpress-migration-api'),
                 'type' => 'integer',
                 'default' => 1,
                 'minimum' => 1,
             ],
             'per_page' => [
-                'description' => __('Records per page.', 'uamswp-migration-api'),
+                'description' => __('Records per page.', 'aether-wordpress-migration-api'),
                 'type' => 'integer',
                 'default' => Config::int('per_page_default', 50),
                 'minimum' => 1,

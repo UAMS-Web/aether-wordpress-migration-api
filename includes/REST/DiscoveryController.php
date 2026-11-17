@@ -123,7 +123,7 @@ final class DiscoveryController extends Controller
             'uamswp_migration_api_registration_is_not_site_scoped',
             sprintf(
                 /* translators: 1: what is being asked for, 2: the requested site id. */
-                __('Registered %1$s cannot be read for another site. Registration is process-global — plugins register on `init` for the site that booted the request, and switching sites does not re-run that — so serving this would mix one site\'s registrations with site %2$d\'s counts. Ask site %2$d through its own REST root instead; this namespace is registered on every site in the network.', 'uamswp-migration-api'),
+                __('Registered %1$s cannot be read for another site. Registration is process-global — plugins register on `init` for the site that booted the request, and switching sites does not re-run that — so serving this would mix one site\'s registrations with site %2$d\'s counts. Ask site %2$d through its own REST root instead; this namespace is registered on every site in the network.', 'aether-wordpress-migration-api'),
                 $what,
                 is_numeric($requested) ? (int) $requested : get_current_blog_id()
             ),

@@ -76,7 +76,7 @@ final class TokenPage
      */
     public static function addPage(): void
     {
-        $title = __('Migration API token', 'uamswp-migration-api');
+        $title = __('Migration API token', 'aether-wordpress-migration-api');
 
         if (is_multisite()) {
             add_submenu_page(
@@ -110,7 +110,7 @@ final class TokenPage
         // and nothing about that guarantees it was reached through the menu.
         if (! current_user_can(Auth::capability())) {
             wp_die(
-                esc_html__('You do not have permission to manage the migration API token.', 'uamswp-migration-api'),
+                esc_html__('You do not have permission to manage the migration API token.', 'aether-wordpress-migration-api'),
                 '',
                 ['response' => 403]
             );
@@ -119,7 +119,7 @@ final class TokenPage
         $issued = self::handleSubmission();
 
         echo '<div class="wrap">';
-        echo '<h1>'.esc_html__('Migration API token', 'uamswp-migration-api').'</h1>';
+        echo '<h1>'.esc_html__('Migration API token', 'aether-wordpress-migration-api').'</h1>';
 
         self::renderIssued($issued);
         self::renderCurrent();
@@ -160,11 +160,11 @@ final class TokenPage
         }
 
         echo '<div class="notice notice-success"><p><strong>';
-        echo esc_html__('Copy this token now. It is not shown again and is not recoverable.', 'uamswp-migration-api');
+        echo esc_html__('Copy this token now. It is not shown again and is not recoverable.', 'aether-wordpress-migration-api');
         echo '</strong></p><p><code>'.esc_html($issued['token']).'</code></p><p>';
         printf(
             /* translators: %s: the token's public identifier. */
-            esc_html__('Identifier: %s', 'uamswp-migration-api'),
+            esc_html__('Identifier: %s', 'aether-wordpress-migration-api'),
             '<code>'.esc_html($issued['identifier']).'</code>'
         );
         echo '</p></div>';
@@ -179,7 +179,7 @@ final class TokenPage
         $current = \is_array($record) ? ($record['current'] ?? null) : null;
 
         if (! \is_array($current)) {
-            echo '<p>'.esc_html__('No token has been issued for this network.', 'uamswp-migration-api').'</p>';
+            echo '<p>'.esc_html__('No token has been issued for this network.', 'aether-wordpress-migration-api').'</p>';
 
             return;
         }
@@ -190,7 +190,7 @@ final class TokenPage
         echo '<p>';
         printf(
             /* translators: %s: the token's public identifier. */
-            esc_html__('Current token: %s', 'uamswp-migration-api'),
+            esc_html__('Current token: %s', 'aether-wordpress-migration-api'),
             '<code>'.esc_html($identifier).'</code>'
         );
 
@@ -198,7 +198,7 @@ final class TokenPage
             echo ' — ';
             printf(
                 /* translators: %s: date the token was issued. */
-                esc_html__('issued %s', 'uamswp-migration-api'),
+                esc_html__('issued %s', 'aether-wordpress-migration-api'),
                 esc_html(self::formatTimestamp($created))
             );
         }
@@ -232,7 +232,7 @@ final class TokenPage
         echo '<p>';
         printf(
             /* translators: 1: the previous token's identifier, 2: expiry time. */
-            esc_html__('The previous token %1$s is still accepted until %2$s.', 'uamswp-migration-api'),
+            esc_html__('The previous token %1$s is still accepted until %2$s.', 'aether-wordpress-migration-api'),
             '<code>'.esc_html(\is_string($previous['identifier'] ?? null) ? $previous['identifier'] : '').'</code>',
             esc_html(self::formatTimestamp($previous['expires']))
         );
@@ -269,14 +269,14 @@ final class TokenPage
         $hasToken = \is_array($record) && \is_array($record['current'] ?? null);
 
         $label = $hasToken
-            ? __('Regenerate token', 'uamswp-migration-api')
-            : __('Generate token', 'uamswp-migration-api');
+            ? __('Regenerate token', 'aether-wordpress-migration-api')
+            : __('Generate token', 'aether-wordpress-migration-api');
 
         if ($hasToken && ! $justIssued) {
             echo '<p>';
             printf(
                 /* translators: %s: the overlap window, already formatted. */
-                esc_html__('Regenerating issues a new token and keeps the current one working for %s, so the consumer can be updated without a refused request in between.', 'uamswp-migration-api'),
+                esc_html__('Regenerating issues a new token and keeps the current one working for %s, so the consumer can be updated without a refused request in between.', 'aether-wordpress-migration-api'),
                 esc_html(human_time_diff(0, Token::rotationWindow()))
             );
             echo '</p>';

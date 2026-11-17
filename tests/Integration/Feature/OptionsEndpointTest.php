@@ -710,7 +710,10 @@ it('pins a baseline that includes this plugin and stays sorted', function (): vo
 
     usort($sorted, strcasecmp(...));
 
+    // Both folder names stay until every install has moved to the new one
+    // (#93, #94): a site still on the old folder reports only the old slug.
     expect($reviewed)->toContain('uamswp-migration-api')
+        ->and($reviewed)->toContain('aether-wordpress-migration-api')
         ->and($reviewed)->toBe($sorted);
 });
 

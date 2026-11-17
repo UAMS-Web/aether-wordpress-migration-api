@@ -109,7 +109,7 @@ docs/DECISIONS.md merge=union
 # one. `config/local.php` is git-ignored, so it never reaches the archive.
 /* export-ignore
 /.* export-ignore
-/uamswp-migration-api.php -export-ignore
+/aether-wordpress-migration-api.php -export-ignore
 /includes -export-ignore
 /config -export-ignore
 

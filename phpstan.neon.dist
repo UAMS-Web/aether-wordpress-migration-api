@@ -87,7 +87,7 @@ parameters:
         - includes
         - config
         - scripts
-        - uamswp-migration-api.php
+        - aether-wordpress-migration-api.php
         # First-party test code is analyzed at the same level as source. Test
         # bugs — broken mocks, wrong-typed fixtures, assertions calling methods
         # that no longer exist — are real bugs.
@@ -142,7 +142,7 @@ parameters:
         # to this branch is a fatal error instead of an admin notice.
         -
             identifier: if.alwaysFalse
-            path: uamswp-migration-api.php
+            path: aether-wordpress-migration-api.php
 
         # `php-stubs/wordpress-stubs` is pinned `~6.8.0` to match the
         # WordPress floor, 6.8.11 (D-106, #13), which resolves to v6.8.3. Those stubs tag

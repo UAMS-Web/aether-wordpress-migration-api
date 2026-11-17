@@ -82,7 +82,7 @@ final class PostsController extends Controller
         if ($request->has_param('file') && $type !== 'attachment') {
             return new WP_Error(
                 'uamswp_migration_api_file_not_attachment',
-                __('`file` selects attachments and is only accepted on `/posts/attachment`.', 'uamswp-migration-api'),
+                __('`file` selects attachments and is only accepted on `/posts/attachment`.', 'aether-wordpress-migration-api'),
                 ['status' => 400]
             );
         }
@@ -142,7 +142,7 @@ final class PostsController extends Controller
         if (! $post instanceof WP_Post || $post->post_type !== $type) {
             return new WP_Error(
                 'uamswp_migration_api_not_found',
-                __('No record of that type with that id.', 'uamswp-migration-api'),
+                __('No record of that type with that id.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -180,7 +180,7 @@ final class PostsController extends Controller
         if (! \in_array($type, Config::strings('post_types'), true)) {
             return new WP_Error(
                 'uamswp_migration_api_unknown_post_type',
-                __('That post type is not served here.', 'uamswp-migration-api'),
+                __('That post type is not served here.', 'aether-wordpress-migration-api'),
                 ['status' => 404]
             );
         }
@@ -220,13 +220,13 @@ final class PostsController extends Controller
             $site > 0
                 ? sprintf(
                     /* translators: 1: post type name, 2: site id. */
-                    __('`%1$s` is served by this deployment but is not registered in the process handling this request. Request it from site %2$d\'s own REST root.', 'uamswp-migration-api'),
+                    __('`%1$s` is served by this deployment but is not registered in the process handling this request. Request it from site %2$d\'s own REST root.', 'aether-wordpress-migration-api'),
                     $type,
                     $site
                 )
                 : sprintf(
                     /* translators: %s: post type name. */
-                    __('`%s` is served by this deployment but is not registered on this site.', 'uamswp-migration-api'),
+                    __('`%s` is served by this deployment but is not registered on this site.', 'aether-wordpress-migration-api'),
                     $type
                 ),
             ['status' => 404]
@@ -656,7 +656,7 @@ final class PostsController extends Controller
 
         return new WP_Error(
             'uamswp_migration_api_bad_modified_after',
-            __('`modified_after` is not a timestamp this endpoint can read. Use `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS` (GMT), or an ISO 8601 timestamp.', 'uamswp-migration-api'),
+            __('`modified_after` is not a timestamp this endpoint can read. Use `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS` (GMT), or an ISO 8601 timestamp.', 'aether-wordpress-migration-api'),
             ['status' => 400]
         );
     }
@@ -670,24 +670,24 @@ final class PostsController extends Controller
     {
         return [
             'status' => [
-                'description' => __('Post statuses to include. Defaults to every status except auto-draft.', 'uamswp-migration-api'),
+                'description' => __('Post statuses to include. Defaults to every status except auto-draft.', 'aether-wordpress-migration-api'),
                 'type' => 'array',
                 'items' => ['type' => 'string'],
             ],
             'modified_after' => [
-                'description' => __('Only records modified strictly after this GMT timestamp. Never-published records, whose GMT column WordPress zeroes, are always included.', 'uamswp-migration-api'),
+                'description' => __('Only records modified strictly after this GMT timestamp. Never-published records, whose GMT column WordPress zeroes, are always included.', 'aether-wordpress-migration-api'),
                 'type' => 'string',
                 'validate_callback' => [self::class, 'validateModifiedAfter'],
             ],
             'include' => [
-                'description' => __('Limit to these record ids.', 'uamswp-migration-api'),
+                'description' => __('Limit to these record ids.', 'aether-wordpress-migration-api'),
                 'type' => 'array',
                 'items' => ['type' => 'integer'],
             ],
             'file' => [
                 'description' => sprintf(
                     /* translators: %d: maximum number of paths per request. */
-                    __("Attachments only. Limit to the attachments these file paths belong to, relative to the site's own uploads directory, such as `2020/09/photo.png`. A generated size, such as `2020/09/photo-750x629.png`, resolves to its attachment. Combined with `include` as a union. Unmatched paths are omitted. Send as `file[]`: a single comma- or space-separated `file` value is split on those characters. At most %d paths per request, which bounds the paths and not the records, so a selection can span more than one page.", 'uamswp-migration-api'),
+                    __("Attachments only. Limit to the attachments these file paths belong to, relative to the site's own uploads directory, such as `2020/09/photo.png`. A generated size, such as `2020/09/photo-750x629.png`, resolves to its attachment. Combined with `include` as a union. Unmatched paths are omitted. Send as `file[]`: a single comma- or space-separated `file` value is split on those characters. At most %d paths per request, which bounds the paths and not the records, so a selection can span more than one page.", 'aether-wordpress-migration-api'),
                     AttachmentFiles::MAX_PATHS
                 ),
                 'type' => 'array',

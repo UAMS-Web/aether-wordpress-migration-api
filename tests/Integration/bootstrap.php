@@ -499,7 +499,7 @@ tests_add_filter(
             require_once $prettyLinks;
         }
 
-        require dirname(__DIR__, 2).'/uamswp-migration-api.php';
+        require dirname(__DIR__, 2).'/aether-wordpress-migration-api.php';
     }
 );
 
