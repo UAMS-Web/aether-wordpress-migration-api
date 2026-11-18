@@ -228,3 +228,12 @@ wppusher
 wptests
 xyzzy
 yoast
+ampcode
+cntrl
+Larastan
+Livewire
+Packagist
+phpversion
+sprintf
+strtolower
+wcag

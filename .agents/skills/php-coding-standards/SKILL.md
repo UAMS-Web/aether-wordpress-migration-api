@@ -101,7 +101,7 @@ the plugin has one, the runtime PHP version guard that turns an unsupported PHP 
 notice instead of a fatal error. What its `Author` and `Author URI` fields hold is in
 [`php-documentation`](../php-documentation/SKILL.md) section 5.
 
-`uamswp-migration-api.php` carries the PHP 8.2 runtime guard, and `rector.php` is configured never
+`aether-wordpress-migration-api.php` carries the PHP 8.2 runtime guard, and `rector.php` is configured never
 to touch that guard (`$neverRules`, path-scoped to that one file): three Rector rules each reason
 from `composer.json`'s `^8.2` that the branch is unreachable, and between them would delete the
 version test, the admin notice and the early return. The branch exists for the case that reasoning
@@ -189,7 +189,7 @@ if (
 }
 ```
 
-Short calls that read fine inline (`__('…', 'uamswp-migration-api')`, `$entry->get('field',
+Short calls that read fine inline (`__('…', 'aether-wordpress-migration-api')`, `$entry->get('field',
 [])`, `add_action('rest_api_init', …)`) stay inline; the rule bites on definitions and on calls
 long enough to wrap. Pint's `method_argument_space: ensure_fully_multiline` normalizes a split
 argument list once you have broken the first line, so `vendor/bin/pint --dirty` finishes the job.

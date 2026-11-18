@@ -98,6 +98,8 @@
 //       },                                  regexes no tracked file may match
 //       "chain": false,                     true: stop at the first failure
 //       "statusContext": "local-ci",        the context --commit-status posts under
+//       "registeredPatches": true,          false stops the runner adding the patches-registered job
+//                                           it adds when composer.lock locks a uams-web/patches-* package
 //       "jobs": [
 //         { "name": "pint", "run": "vendor/bin/pint --test",
 //           "paths": ["**/*.php", "pint.json"] },
@@ -231,7 +233,7 @@
 
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { accessSync, constants, existsSync, linkSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, statSync, writeFileSync, unlinkSync } from 'node:fs'
+import { accessSync, constants, cpSync, existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, statSync, writeFileSync, unlinkSync } from 'node:fs'
 import { constants as osConstants, homedir, tmpdir } from 'node:os'
 import { basename, delimiter, dirname, extname, join, posix, relative, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -373,7 +375,7 @@ const asStringList = (value, what) => {
 // Normalize and validate the parsed JSON. Throws on anything the runner could
 // only guess about, so a typo in the config fails here with the key named
 // rather than as a job that never runs.
-const TOP_LEVEL_KEYS = ['base', 'php', 'chain', 'guard', 'jobs', 'prepare', 'statusContext', 'watch']
+const TOP_LEVEL_KEYS = ['base', 'php', 'chain', 'guard', 'jobs', 'prepare', 'registeredPatches', 'statusContext', 'watch']
 const JOB_KEYS = ['name', 'run', 'always', 'each', 'paths', 'requires', 'mutation', 'parallel', 'database', 'php', 'installs']
 const GUARD_KEYS = ['deny']
 const MUTATION_KEYS = ['minScore']
@@ -483,7 +485,66 @@ export function parseConfig(raw) {
         throw new Error('"statusContext" must be a non-empty string of at most 255 characters, such as "local-ci".')
     }
 
-    return { base, php: php === null ? null : String(php), chain, deny, jobs, prepare: parsePrepare(config.prepare), statusContext: statusContext.trim() }
+    const registeredPatches = config.registeredPatches === undefined ? true : config.registeredPatches
+    if (typeof registeredPatches !== 'boolean') {
+        throw new Error('"registeredPatches" must be true or false.')
+    }
+
+    return { base, php: php === null ? null : String(php), chain, deny, jobs, prepare: parsePrepare(config.prepare), registeredPatches, statusContext: statusContext.trim() }
+}
+
+// The check that every patch a locked `uams-web/patches-*` package declares is registered at the
+// root (UAMS-Web/uams-claude-skills#768). The runner adds it as a job on its own when the lock
+// names such a package (UAMS-Web/uams-claude-skills#770), so a repository needs no `local-ci.json`
+// entry, and no per-repository edit when the check moves.
+export const REGISTERED_PATCHES_JOB = 'patches-registered'
+export const REGISTERED_PATCHES_CHECK = '.claude/skills/upstream-patch-lifecycle/scripts/check-registered-patches.mjs'
+const PATCHES_PACKAGE_PREFIX = 'uams-web/patches-'
+
+/**
+ * The `uams-web/patches-*` packages `composer.lock` locks, from `packages` and `packages-dev`.
+ * A missing lock is no packages; a lock that is not JSON is an error, since a run that cannot
+ * read it cannot say whether the check applies.
+ */
+export function lockedPatchesPackages(repoRoot) {
+    const file = join(repoRoot, 'composer.lock')
+    if (!existsSync(file)) {
+        return []
+    }
+    let lock
+    try {
+        lock = JSON.parse(readFileSync(file, 'utf8'))
+    } catch (error) {
+        throw new Error(`composer.lock cannot be read as JSON, so the runner cannot tell whether a patches-* package is locked: ${error.message}`)
+    }
+    const packages = [...(Array.isArray(lock?.packages) ? lock.packages : []), ...(Array.isArray(lock?.['packages-dev']) ? lock['packages-dev'] : [])]
+    return packages.filter((p) => typeof p?.name === 'string' && p.name.toLowerCase().startsWith(PATCHES_PACKAGE_PREFIX)).map((p) => p.name)
+}
+
+/**
+ * The config with the `patches-registered` job added when a patches package is locked, unless
+ * `"registeredPatches": false` opts out or the config already defines a job of that name (the
+ * repository's own entry then stands, so a copy of the template's job is never run twice).
+ */
+export function withImplicitJobs(config, lockedPackages) {
+    if (!config.registeredPatches || lockedPackages.length === 0 || config.jobs.some((job) => job.name === REGISTERED_PATCHES_JOB)) {
+        return config
+    }
+    const job = {
+        name: REGISTERED_PATCHES_JOB,
+        run: `node ${REGISTERED_PATCHES_CHECK}`,
+        paths: [],
+        each: [],
+        always: true,
+        requires: [normalizeRequirement('bin:node', 'the implicit patches-registered job')],
+        mutation: null,
+        parallel: null,
+        database: null,
+        php: null,
+        installs: false,
+        implicit: true,
+    }
+    return { ...config, jobs: [...config.jobs, job] }
 }
 
 const PREPARE_KEYS = ['submodules', 'residue', 'patches']
@@ -667,6 +728,72 @@ export function mutationProblems(output, minScore) {
     return problems
 }
 
+// The plugin Pest's mutation run executes, and the command that restores its patches.
+export const MUTATE_PACKAGE = 'pestphp/pest-plugin-mutate'
+export const MUTATE_REINSTALL = `composer reinstall ${MUTATE_PACKAGE}`
+
+// The patches patches.lock.json records for the mutation plugin, in lock order
+// (UAMS-Web/uams-claude-skills#821). A plain `composer install` that moves the patches package
+// can leave the plugin without patches the lock records, and a mutation run then looks normal while
+// annotations stop working and mutants go uncounted. Text that is not a lock throws: reading it as
+// "no patches" would let a broken lock pass.
+export function lockedMutatePatches(lockText) {
+    if (lockText === null) {
+        return []
+    }
+    let parsed
+    try {
+        parsed = JSON.parse(lockText)
+    } catch (error) {
+        throw new Error(`patches.lock.json is not valid JSON (${error.message}).`)
+    }
+    const patches = parsed?.patches ?? {}
+    if (typeof patches !== 'object' || Array.isArray(patches)) {
+        throw new Error('patches.lock.json has a "patches" that is not an object.')
+    }
+    const entries = patches[MUTATE_PACKAGE] ?? []
+    if (!Array.isArray(entries)) {
+        throw new Error(`patches.lock.json records ${MUTATE_PACKAGE} patches as something other than a list.`)
+    }
+    return entries.map((entry) => ({ url: String(entry?.url ?? ''), description: String(entry?.description ?? ''), depth: Number.isInteger(entry?.depth) ? entry.depth : 1 }))
+}
+
+// The reasons the installed mutation plugin does not carry every patch the lock records (empty when it
+// does, and when the lock records none). A patch is applied when it reverses cleanly, so each is
+// reverse-applied, last first, to a scratch copy of the installed plugin: reversing one in place would
+// change the tree, and a patch that overlaps a later one only reverses once the later one is out.
+// Nothing here reinstalls or writes to vendor/.
+export function missingMutatePatches({ repoRoot, lockText, run = spawnSync }) {
+    const entries = lockedMutatePatches(lockText)
+    if (entries.length === 0) {
+        return []
+    }
+    const installed = join(repoRoot, 'vendor', ...MUTATE_PACKAGE.split('/'))
+    if (!existsSync(installed)) {
+        return [`${MUTATE_PACKAGE} is not installed under vendor/, so its ${entries.length} locked patch${entries.length === 1 ? '' : 'es'} cannot be checked`]
+    }
+    const scratch = mkdtempSync(join(tmpdir(), 'local-ci-mutate-patches-'))
+    try {
+        cpSync(installed, scratch, { recursive: true })
+        const problems = []
+        for (const entry of [...entries].reverse()) {
+            const label = `${basename(entry.url)}${entry.description === '' ? '' : ` (${entry.description})`}`
+            const file = join(repoRoot, entry.url)
+            if (entry.url === '' || !existsSync(file)) {
+                problems.push(`${label}: the patch file is not at ${entry.url === '' ? 'a recorded path' : entry.url}, so whether it is applied cannot be checked`)
+                continue
+            }
+            const result = run('git', ['apply', '--reverse', '--ignore-whitespace', `-p${entry.depth}`, file], { cwd: scratch, encoding: 'utf8' })
+            if (result.error || result.status !== 0) {
+                problems.push(`${label}: not applied to vendor/${MUTATE_PACKAGE}`)
+            }
+        }
+        return problems.reverse()
+    } finally {
+        rmSync(scratch, { recursive: true, force: true })
+    }
+}
+
 const BIN_PREFIX = 'bin:'
 
 // A `requires` entry is either `bin:<name>` (a command on PATH) or a path
@@ -725,11 +852,13 @@ export function loadConfig(repoRoot) {
             `${CONFIG_FILE} not found at ${repoRoot}. Copy .claude/skills/local-ci/templates/${CONFIG_FILE} there and edit its jobs.`,
         )
     }
+    let config
     try {
-        return parseConfig(readFileSync(file, 'utf8'))
+        config = parseConfig(readFileSync(file, 'utf8'))
     } catch (error) {
         throw new Error(`${CONFIG_FILE}: ${error.message}`)
     }
+    return withImplicitJobs(config, config.registeredPatches ? lockedPatchesPackages(repoRoot) : [])
 }
 
 // --- globs -----------------------------------------------------------------
@@ -2157,6 +2286,20 @@ function makeExecutor({ repoRoot, config, php, jobPhps = new Map(), trackedFiles
         const jobEnv = { ...jobEnvironment(env, job, config.jobs), ...(own ? { LOCAL_CI_PHP: own.path } : {}) }
         const command = commandFor(job.run, phpPath)
         if (job.mutation) {
+            let missing
+            try {
+                missing = missingMutatePatches({ repoRoot, lockText: readOrNull(join(repoRoot, 'patches.lock.json')) })
+            } catch (error) {
+                missing = [error.message]
+            }
+            if (missing.length > 0) {
+                console.log(red(`  ${MUTATE_PACKAGE} does not carry every patch patches.lock.json records, so the mutation run was not started:`))
+                for (const problem of missing) {
+                    console.log(red(`    ${problem}`))
+                }
+                console.log(red(`  Restore them with: ${MUTATE_REINSTALL}`))
+                return { code: 1 }
+            }
             console.log(`  $ ${command}`)
             const { code, output } = runShell(command, repoRoot, jobEnv, { capture: true })
             process.stdout.write(output === '' || output.endsWith('\n') ? output : `${output}\n`)
