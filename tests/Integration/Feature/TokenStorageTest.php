@@ -116,7 +116,7 @@ it('drops the previous token when the window is closed', function (): void {
 });
 
 it('discriminates across the three-request verification', function (): void {
-    // The check `README.md` gives an operator, run as dispatch: correct token
+    // The check `docs/wiki/Giving-a-consumer-access.md` gives an operator, run as dispatch: correct token
     // 200, no header 401, wrong token 401. Logged out, because the point is
     // that the token authenticates on its own.
     $issued = Token::issue();
