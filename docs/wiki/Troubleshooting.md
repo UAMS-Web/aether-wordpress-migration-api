@@ -12,7 +12,7 @@ Written against `main` after v0.8.9.
 
 ## Every request answers 401, including one with the right key
 
-**Cause:** the API answers every failed credential with the same `401` `uamswp_migration_api_unauthorized`, so a token pasted with a stray space, a token from another network, a shared secret whose constant is not defined, and no key at all look the same.
+**Cause:** the API answers every failed credential with the same `401` `uamswp_migration_api_unauthorized`, so a token pasted with a stray space, a token from another network, a shared secret whose constant is not defined, and no key at all look the same. A request whose `site` is wrong gets that site error first, whatever its key.
 
 **Fix:** generate a new token on the site's own token page, paste it again, and run the three requests on [Giving a consumer access](Giving-a-consumer-access.md#verify-with-three-requests-not-one). For the shared secret, check that `UAMSWP_MIGRATION_API_SECRET` is defined above the `/* That's all, stop editing! */` line. Rotated recently? The previous token stops working an hour after the new one is issued.
 
@@ -34,9 +34,9 @@ Written against `main` after v0.8.9.
 
 `uamswp_migration_api_type_not_registered_here`.
 
-**Cause:** the post type is exposed by configuration but not registered on that site, usually because the plugin or theme that registers it is not active there.
+**Cause:** the post type is exposed by configuration but not registered in the PHP process handling the request, usually because the plugin or theme that registers it is not active on the site whose URL was called. With `site`, registration comes from the site whose URL was called, not from the site named.
 
-**Fix:** none needed if the site has no such content. `GET /` on that site lists the post types it does expose. `uamswp_migration_api_unknown_post_type` instead means the type is not in the configuration at all ([Configuration and hooks](Configuration-and-hooks.md)).
+**Fix:** with `site`, call the named site on its own URL, without `site`. Without it, the site has no such type registered, so there is nothing of it to read. `GET /` on a site lists the post types it exposes. `uamswp_migration_api_unknown_post_type` instead means the type is not in the configuration at all ([Configuration and hooks](Configuration-and-hooks.md)).
 
 ## A form route answers 404 although the plugin is installed
 
@@ -64,9 +64,9 @@ Written against `main` after v0.8.9.
 
 ## An option is missing from `/options`
 
-**Cause:** its name matched the denylist, or its value looked like a credential. Either way it is counted in `denied` and left out.
+**Cause:** its name matched the denylist, counted in `denied.by_name`, or its value looked like a credential, counted in `denied.by_shape`. Either way it is left out.
 
-**Fix:** if the value is not a secret, add an override in `config/local.php` ([Configuration and hooks](Configuration-and-hooks.md)). If `denylist.stale` is `true`, plugins were installed or removed since the denylist was reviewed, and the denylist itself needs a review.
+**Fix:** a value withheld by its name can be released by changing `option_denylist` in `config/local.php` ([Configuration and hooks](Configuration-and-hooks.md)), if the value is not a secret. A value withheld by its shape cannot be released by any configuration. If `denylist.stale` is `true`, a plugin now active is missing from the list the denylist was reviewed against, and the denylist itself needs a review.
 
 ## A front-gated site refuses the token
 

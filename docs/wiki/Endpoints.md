@@ -16,20 +16,20 @@ The fields of each record are on [Response shapes](Response-shapes.md); the erro
 
 | Route | Paginated | Returns |
 | --- | --- | --- |
-| `/` | no | The plugin name and version, the site that answered, the exposed post types and taxonomies, the pagination defaults, and each route family with its parameters and an `available` flag for the form and redirect plugins. |
+| `/` | no | The plugin name and a version number (not yet the plugin's release: [#98](https://github.com/UAMS-Web/aether-wordpress-migration-api/issues/98)), the site that answered, the exposed post types and taxonomies, the pagination defaults, and each route family with its parameters and an `available` flag for the form and redirect plugins. |
 | `/sites` | no | Every site on the network (one entry on a single site), by ID, with the WXR channel fields and record counts. |
-| `/post-types` | no | Every registered post type, with whether it is exposed and its counts by status. Refuses `site`. |
-| `/taxonomies` | no | Every registered taxonomy, with whether it is exposed and its term count. Refuses `site`. |
-| `/options` | no | The site's options table, with secrets withheld, plus ACF options-page values and the installed plugins. |
+| `/post-types` | no | Every registered post type, with whether it is exposed and its counts by status. Refuses `site` naming another site. |
+| `/taxonomies` | no | Every registered taxonomy, with whether it is exposed and its term count. Refuses `site` naming another site. |
+| `/options` | no | The site's options table, with secrets withheld, plus ACF options-page values and the active plugins. |
 | `/authors` | yes | Every user who authored a post that is not an auto-draft. Also returns `X-UAMSWP-Orphaned-Authors` (the count of author IDs that match no user) and `X-UAMSWP-Orphaned-Author-Ids` (up to 200 of those IDs). |
 
 ## Content
 
 | Route | Paginated | Returns |
 | --- | --- | --- |
-| `/posts/<type>` | yes | Post records of an exposed post type, lowest ID first. |
+| `/posts/<type>` | yes | Post records of an exposed post type registered for the site whose URL was called, lowest ID first. |
 | `/posts/<type>/<id>` | no | One post record. |
-| `/terms/<taxonomy>` | yes | Term records of an exposed taxonomy, empty terms included, lowest ID first. |
+| `/terms/<taxonomy>` | yes | Term records of an exposed taxonomy registered for the site whose URL was called, empty terms included, lowest ID first. |
 | `/terms/<taxonomy>/<id>` | no | One term record. |
 
 `/posts/<type>` also takes:

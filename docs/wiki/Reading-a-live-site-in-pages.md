@@ -1,6 +1,6 @@
 Written against `main` after v0.8.9.
 
-A migration pages through a site while editors keep working on it. This page covers how to read a whole collection without missing or repeating a record, and how to re-pull only what changed since the last run.
+A migration pages through a site while editors keep working on it. This page covers how to read a whole collection, what an edit or a deletion during the read does to it, and how to re-pull only what changed since the last run.
 
 ## Read a whole collection
 
@@ -8,9 +8,16 @@ A migration pages through a site while editors keep working on it. This page cov
 2. Read `X-WP-Total` and `X-WP-TotalPages` from the response headers.
 3. Request `page=2`, `page=3` and so on up to `X-WP-TotalPages`. A page past the last one returns an empty array, not an error.
 
-**Every collection is ordered by ID ascending, never by date.** IDs never change, so a record edited during the run stays on the page it was on. Date ordering would let an edited record move to another page mid-run and be read twice or skipped. Terms are ordered by `term_id`; forms, feeds and redirect rules by their own ID.
+**Every collection is ordered by ID ascending, never by date.** IDs never change, so a record edited during the run stays where it was. Date ordering would let an edited record move to another page mid-run and be read twice or skipped. Terms are ordered by `term_id`; forms, feeds and redirect rules by their own ID.
 
-**Note:** the totals are counted when each page is served. A record created during the run gets a higher ID than every record already read, so it lands at the end and is picked up by the last page or by the next incremental pull.
+**Pages are counted by offset, not by ID.** `page=3` means "skip the first `2 x per_page` records", so the collection has to hold still below the current page:
+
+- **A record created during the run** gets a higher ID than every record already read, so it lands at the end and is picked up by the last page or by the next incremental pull.
+- **A record removed during the run** from below the current page (deleted permanently, or moved out of a `status` filter) shifts every later record back by one, and **one record is skipped**. Attachments skip the trash by default, so a deleted attachment is removed at once.
+
+**Warning:** to catch a record skipped this way, follow a full read with an incremental pull (below), or compare the IDs you read against a second read of the same collection.
+
+The totals are counted when each page is served, so `X-WP-TotalPages` can change between pages.
 
 ## Re-pull only what changed
 

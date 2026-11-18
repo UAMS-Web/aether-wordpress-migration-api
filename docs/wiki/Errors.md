@@ -6,7 +6,7 @@ Every error is a standard WordPress REST error: a JSON body with `code`, `messag
 
 | Code | Status | When |
 | --- | --- | --- |
-| `uamswp_migration_api_unauthorized` | 401 | No valid credential: no key, a wrong key, an unset secret, or no signed-in user. Deliberately identical in every case. |
+| `uamswp_migration_api_unauthorized` | 401 | No valid credential: no key, a wrong key, an unset secret, or no signed-in user. Deliberately identical in every case. A bad `site` is checked first, so a request with a bad `site` gets that site error instead. |
 | `uamswp_migration_api_forbidden` | 403 | A signed-in WordPress user without the capability on the site being read. |
 
 ## Site
@@ -14,19 +14,19 @@ Every error is a standard WordPress REST error: a JSON body with `code`, `messag
 | Code | Status | When |
 | --- | --- | --- |
 | `uamswp_migration_api_not_multisite` | 400 | `site` given on a single-site install. |
-| `uamswp_migration_api_invalid_site` | 400 | `site` is not a whole number of 1 or more. |
+| `uamswp_migration_api_invalid_site` | 400 | `site` is not a number, or is a number below 1. A number with a fraction is truncated (`2.5` reads site 2). |
 | `uamswp_migration_api_unknown_site` | 404 | No site with that ID on the network. |
 | `uamswp_migration_api_unavailable_site` | 409 | The site is marked archived, deleted or spam. |
-| `uamswp_migration_api_registration_is_not_site_scoped` | 400 | `site` given to `/post-types` or `/taxonomies`. |
+| `uamswp_migration_api_registration_is_not_site_scoped` | 400 | `site` naming another site given to `/post-types` or `/taxonomies`. |
 
 ## Content
 
 | Code | Status | When |
 | --- | --- | --- |
 | `uamswp_migration_api_unknown_post_type` | 404 | The post type is not one this plugin exposes. |
-| `uamswp_migration_api_type_not_registered_here` | 404 | The post type is exposed but not registered on the site being read. |
+| `uamswp_migration_api_type_not_registered_here` | 404 | The post type is exposed but not registered in the PHP process handling the request. With `site`, that is the site whose URL was called, not the site named. |
 | `uamswp_migration_api_unknown_taxonomy` | 404 | The taxonomy is not one this plugin exposes. |
-| `uamswp_migration_api_taxonomy_not_registered_here` | 404 | The taxonomy is exposed but not registered on the site being read. |
+| `uamswp_migration_api_taxonomy_not_registered_here` | 404 | The taxonomy is exposed but not registered in the PHP process handling the request. With `site`, that is the site whose URL was called, not the site named. |
 | `uamswp_migration_api_file_not_attachment` | 400 | `file` given on a post type other than `attachment`. |
 | `uamswp_migration_api_bad_modified_after` | 400 | `modified_after` is not a timestamp the route can read; returned inside `rest_invalid_param`. |
 | `uamswp_migration_api_not_found` | 404 | No post, term or form with that ID (a post of another type counts as not found), or a trashed form. |

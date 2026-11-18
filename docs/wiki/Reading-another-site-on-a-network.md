@@ -24,11 +24,15 @@ Every successful response carries `X-UAMSWP-Site`, the blog ID of the site that 
 
 Error responses over HTTP carry it too, and a refusal names the site being read, since the site is chosen before the credential is checked.
 
-## Two routes read the site you call, not the one you name
+## What `site` does not switch
 
-`GET /post-types` and `GET /taxonomies` describe what is registered in the PHP process handling the request, and registration does not change when the API switches sites. They refuse `site` with `400` `uamswp_migration_api_registration_is_not_site_scoped`. Call them on the target site's own URL instead.
+Post types and taxonomies are registered once, for the site whose URL was called, and switching sites does not register them again. So under `site`:
 
-The form and redirect routes have a related limit: a form plugin that is not loaded in the process handling the request cannot be read through `site`, and the error message says so. See [Troubleshooting](Troubleshooting.md).
+- **`/posts/<type>` and `/terms/<taxonomy>`** serve a type or taxonomy only if the site whose URL was called registers it. A type that only the named site registers answers `404` `uamswp_migration_api_type_not_registered_here` (or `uamswp_migration_api_taxonomy_not_registered_here`), and the message says to request it from that site's own URL.
+- **`/post-types` and `/taxonomies`** describe the registration of the site whose URL was called, so they refuse `site` naming another site with `400` `uamswp_migration_api_registration_is_not_site_scoped`. Call them on the target site's own URL instead.
+- **The form routes** read a form plugin only if it is loaded for the site whose URL was called, and the error message says so. The redirect routes check the named site.
+
+When a type, taxonomy or plugin differs between sites, call each site on its own URL. See [Troubleshooting](Troubleshooting.md).
 
 ## Reference
 

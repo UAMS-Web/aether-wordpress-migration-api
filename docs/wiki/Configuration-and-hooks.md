@@ -10,9 +10,9 @@ The plugin has no settings screen beyond the token page. What it serves is decid
 | --- | --- | --- | --- |
 | `post_types` | list of strings | the post types the migration reads | Post types `/posts/<type>` serves. A type not registered on a site is skipped there. Revisions, ACF's own field definitions and oEmbed caches are left out on purpose. |
 | `taxonomies` | list of strings | the taxonomies the migration reads | Taxonomies `/terms/<taxonomy>` serves and post records carry in `terms`. |
-| `option_denylist` | list of patterns | transients, and names that end in or contain key, token, secret, password, credential, license or salt | Options left out of `/options`. Patterns use SQL `LIKE` wildcards and match the whole name, ignoring case. |
+| `option_denylist` | list of patterns | transients; names ending in key, token, secret, password, credential(s), license or salt; and names containing `password`, `api_key`, `apikey`, `private_key`, `access_token` or `client_secret` | Options left out of `/options`. Patterns use SQL `LIKE` wildcards and match the whole name, ignoring case. |
 | `option_denylist_nested_keys` | list of patterns | a shorter list of the same kind | Keys withheld inside a decoded option or form setting. |
-| `option_denylist_reviewed_against` | list of plugin slugs | the plugins the denylist was last reviewed against | Compared with the installed plugins to set `denylist.stale` on `/options`. |
+| `option_denylist_reviewed_against` | list of plugin slugs | the plugins the denylist was last reviewed against | Compared with the active plugins to set `denylist.stale` on `/options`. |
 | `identifiers` | map of post type to identifier definitions | a few post types | The plain-string identifiers a post record carries in `identifiers`. |
 | `per_page_default` | integer | `50` | The page size when `per_page` is omitted. |
 | `per_page_max` | integer | `200` | The largest page size; larger values are clamped to it. |

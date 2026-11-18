@@ -13,7 +13,7 @@ Values are returned raw: as stored, un-resolved and un-composed. Nothing is rend
 | `parent`, `menu_order`, `guid`, `link`, `is_sticky`, `ping_status`, `comment_status`, `post_password` | The remaining columns WXR carries. |
 | `terms` | A map of taxonomy to `[{term_id, slug, name, parent, description}]`, for exposed taxonomies only. |
 | `attachment` | `null` except on attachments: `{url, mime_type, file, alt, metadata}`, with `file` relative to the uploads folder. |
-| `meta` | Every postmeta row exactly as stored, as `key: [values]`. Underscore-prefixed keys are included. |
+| `meta` | Every postmeta row exactly as stored, as `key: [values]`. Underscore-prefixed keys are included. A TablePress table also carries `_tablepress_export_table_id`, which the API adds. |
 | `acf` | `{keys, names, name_collisions, defaulted: {keys, names}}`: ACF values read through ACF itself, by field key and by field name. |
 | `identifiers` | `null`, or a map of configured identifier names to a string (or a list of strings), for the post types configured to carry them. |
 
@@ -33,9 +33,9 @@ Values are returned raw: as stored, un-resolved and un-composed. Nothing is rend
 | --- | --- |
 | `options` | Option name to value, with serialized values decoded. Withheld options are left out. |
 | `acf` | ACF options-page values by page, with withheld fields removed. |
-| `denylist` | `{reviewed_against, current, stale, added, removed}`: whether the plugins now installed differ from the set the denylist was last reviewed against. |
+| `denylist` | `{reviewed_against, current, stale, added, removed}`: `reviewed_against` and `current` count the plugins the denylist was reviewed against and the plugins active now; `added` and `removed` list the difference; `stale` is `true` when an active plugin is missing from the reviewed list (a removed one does not set it). |
 | `denied` | `{total, by_name, by_shape}`: how many values were withheld. Counts only, never names. |
-| `plugins` | `[{path, scope, header}]`: each installed plugin, `site` or `network`, with its name, version and text domain. |
+| `plugins` | `[{path, scope, header}]`: each active plugin, `site` or `network`, with its name, version and text domain; `header` is `null` when the active path is not installed. |
 
 An option is withheld when its name matches the denylist or its value looks like a credential (a token, a key or a long encoded run), at any depth inside a decoded value. ACF field-key references (`_options_<field>`) are never withheld. See [Configuration and hooks](Configuration-and-hooks.md).
 

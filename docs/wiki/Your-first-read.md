@@ -24,7 +24,7 @@ The examples use `https://example.test` for the site and `KEY` for the token. Re
    curl -s -H "X-UAMSWP-Migration-Key: $KEY" "$SITE/wp-json/uamswp-migration/v1/"
    ```
 
-   The response names the plugin's version, the site that answered, the post types and taxonomies it exposes, the pagination defaults, and each route family with an `available` flag for the form and redirect plugins.
+   The response names the plugin, the site that answered, the post types and taxonomies it exposes, the pagination defaults, and each route family with an `available` flag for the form and redirect plugins.
 5. **Read the first page of posts.**
 
    ```bash
