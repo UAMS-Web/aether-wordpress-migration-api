@@ -12,8 +12,6 @@ use UAMSWeb\Aether\WordPressImporter\MigrationApi\Config;
 use WP_REST_Request;
 use WP_REST_Response;
 
-use const UAMSWeb\Aether\WordPressImporter\MigrationApi\VERSION;
-
 /**
  * `GET /` — the namespace index.
  *
@@ -48,7 +46,7 @@ final class IndexController extends Controller
         return new WP_REST_Response(
             [
                 'name' => 'UAMSWP Migration API',
-                'version' => VERSION,
+                'version' => self::pluginVersion(),
                 'site' => [
                     'id' => get_current_blog_id(),
                     'name' => get_bloginfo('name'),
@@ -174,5 +172,23 @@ final class IndexController extends Controller
                 ],
             ]
         );
+    }
+
+    /**
+     * The `Version:` line of the plugin header, read on each request.
+     *
+     * Read from the header rather than from a constant beside it: the release
+     * procedure bumps the header alone, so a second copy drifts (#98). Resolved
+     * from this file's location for the reason `Config::all()` gives. The file
+     * is read with no context, so no `extra_plugin_headers` filter applies, and
+     * an absent line reads as an empty string.
+     */
+    private static function pluginVersion(): string
+    {
+        $header = get_file_data(__DIR__.'/../../aether-wordpress-migration-api.php', [
+            'Version' => 'Version',
+        ]);
+
+        return $header['Version'];
     }
 }
