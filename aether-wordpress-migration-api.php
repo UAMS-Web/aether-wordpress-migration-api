@@ -49,7 +49,6 @@ if (version_compare(PHP_VERSION, '8.2', '<')) {
     return;
 }
 
-const VERSION = '0.1.0';
 const REST_NAMESPACE = 'uamswp-migration/v1';
 
 define(__NAMESPACE__.'\PLUGIN_FILE', __FILE__);
