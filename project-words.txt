@@ -27,6 +27,7 @@ absint
 abspath
 acfcdt
 acmr
+activecampaign
 agec
 akia
 akiaiosfodnn
@@ -37,6 +38,8 @@ alrm
 antispam
 apikey
 autoloading
+automator
+automatorwp
 autoupgrade
 blogdescription
 bloginfo
@@ -64,6 +67,7 @@ facetwp
 fatals
 fieldsets
 firstname
+flyingpress
 fqcn
 freemius
 frmpro

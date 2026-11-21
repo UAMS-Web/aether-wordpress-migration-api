@@ -192,6 +192,57 @@ it('serves a settings array carrying only `purchased`', function (): void {
     expect(OptionsPayload::classify('vendor_settings', $stored))->toBe(OptionsPayload::VERDICT_SERVED);
 });
 
+/*
+ * #104. Four rows the shipped denylist served. Each synthetic value is short and
+ * punctuated, so no shape rule sees it; each test first proves that, so a pass
+ * means the new rule withheld the row and not a rule that was already there.
+ */
+
+it('withholds FlyingPress license settings by each of the three license keys', function (string $key): void {
+    $stored = serialize([$key => 'fp-7Q2-x9', 'sc_license_status' => 'valid']);
+    $unnamed = serialize(['vendor_field' => 'fp-7Q2-x9', 'sc_license_status' => 'valid']);
+
+    expect(OptionsPayload::classify('flyingpress_license_options', $unnamed))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('flyingpress_license_options', $stored))->toBe(OptionsPayload::VERDICT_NESTED_KEY);
+})->with(['sc_license_key', 'sc_license_id', 'sc_activation_id']);
+
+it('withholds a Tweets Widget token stored under its widget instance suffix', function (): void {
+    // The name ends in the instance id, so the end-anchored `%token` misses it.
+    expect(OptionsPayload::classify('vendor_widget-2', 'tw-41.x'))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('cfTwitterToken_tweets-widget-2', 'tw-41.x'))->toBe(OptionsPayload::VERDICT_NAME)
+        ->and(OptionsPayload::classify('cfTwitterToken_tweets-widget-17', 'tw-41.x'))->toBe(OptionsPayload::VERDICT_NAME);
+});
+
+it('withholds AutomatorWP settings carrying an ActiveCampaign webhook', function (): void {
+    $webhook = 'https://example.invalid/hook/a-1';
+    $unnamed = serialize(['automatorwp_vendor_url' => $webhook]);
+    $stored = serialize(['automatorwp_activecampaign_webhook' => $webhook, 'automatorwp_activecampaign_webhook_enabled' => 'on']);
+
+    expect(OptionsPayload::classify('automatorwp_settings', $unnamed))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('automatorwp_settings', $stored))->toBe(OptionsPayload::VERDICT_NESTED_KEY);
+});
+
+it('withholds Edit Flow calendar options carrying the feed secret', function (): void {
+    $unnamed = serialize(['ics_feed_name' => 'ef-9x-2Q', 'number_of_weeks' => 6]);
+    $stored = serialize(['ics_secret_key' => 'ef-9x-2Q', 'number_of_weeks' => 6]);
+
+    expect(OptionsPayload::classify('edit_flow_calendar_options', $unnamed))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('edit_flow_calendar_options', $stored))->toBe(OptionsPayload::VERDICT_NESTED_KEY);
+});
+
+it('serves the #104 settings where the named slot is empty or boolean, and harmless neighbors', function (): void {
+    // The new nested rules are exact names, so a similarly named flag or label
+    // beside them, or the slot itself left blank or boolean, withholds nothing.
+    $flyingpress = serialize(['sc_license_key' => '', 'sc_license_status' => 'inactive', 'sc_license_expires' => 'never']);
+    $automatorwp = serialize(['automatorwp_activecampaign_webhook' => false, 'automatorwp_activecampaign_webhook_enabled' => 'on']);
+    $editFlow = serialize(['ics_secret_key' => '', 'ics_subscription' => 'on']);
+
+    expect(OptionsPayload::classify('flyingpress_license_options', $flyingpress))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('automatorwp_settings', $automatorwp))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('edit_flow_calendar_options', $editFlow))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('cfTwitterTokenCount', '3'))->toBe(OptionsPayload::VERDICT_SERVED);
+});
+
 it('agrees with what the endpoint actually serves', function (): void {
     // The claim the sharing rests on: `classify()` is not a parallel opinion
     // about the filter, it *is* the filter. Seed one row per verdict, dispatch

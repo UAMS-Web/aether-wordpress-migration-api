@@ -259,6 +259,13 @@ return [
         '%access\\_token%',
         '%client\\_secret%',
         '%password%',
+
+        // The Twitter Tweets Widget token, stored once per widget instance as
+        // `cfTwitterToken_<widget id>` (#104). The instance suffix keeps the
+        // end-anchored `%token` from matching, so the prefix is named exactly:
+        // `%token\_%` would also take any option merely mentioning a token
+        // before an underscore.
+        'cfTwitterToken\\_%',
     ],
 
     /*
@@ -326,6 +333,22 @@ return [
         // `purchased` beside it, harmless only because this rule skips
         // non-strings, and not obviously safe on the next plugin.
         'purchase\\_code',
+        // FlyingPress's license, inside `flyingpress_license_options` (#104):
+        // the key, and the license and activation ids that pair with it. Named
+        // exactly for the reason `cron_job_key` is: the key ends in `key`, which
+        // this list deliberately leaves out, and `%license%` would also match
+        // flags and labels such as a `license_status` beside it.
+        'sc\\_license\\_key',
+        'sc\\_license\\_id',
+        'sc\\_activation\\_id',
+        // The ActiveCampaign webhook URL inside `automatorwp_settings` (#104).
+        // A webhook URL carries its own secret. Named exactly: a `%webhook%`
+        // pattern would also take the boolean switches that enable a webhook.
+        'automatorwp\\_activecampaign\\_webhook',
+        // The secret Edit Flow puts in its calendar feed URL, inside
+        // `edit_flow_calendar_options` (#104). It ends in `key`, not `secret`,
+        // so `%secret` does not see it.
+        'ics\\_secret\\_key',
     ],
 
     /*
