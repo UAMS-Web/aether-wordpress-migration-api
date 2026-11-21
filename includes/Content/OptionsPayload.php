@@ -978,6 +978,16 @@ final class OptionsPayload
     {
         $slugs = [];
 
+        /*
+         * The second route to ACF in `includes/`, and it needs the guard
+         * `FieldReader::read()` carries (#111). On a site where ACF is not
+         * loaded there are no options pages, and `GET /options` must still
+         * serve the options table rather than raise a fatal here.
+         */
+        if (! \function_exists('acf_get_field_groups')) {
+            return $slugs;
+        }
+
         foreach (acf_get_field_groups() as $group) {
             $location = \is_array($group) ? ($group['location'] ?? null) : null;
 
