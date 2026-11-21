@@ -63,6 +63,27 @@ final class FieldReader
         $collisions = [];
         $identities = [];
 
+        /*
+         * A site where ACF is not loaded has no field groups to read, so it
+         * gets the empty shape rather than a fatal on the first ACF call
+         * (#111). Network activation does not guarantee ACF loads on every
+         * site: three of go.uams.edu's redirect sites run without it, and
+         * every record there crashed `GET /posts`. The record's raw `meta`
+         * is unaffected, so nothing stored is lost; there is simply no
+         * structured view to add. The value-store reset below is skipped with
+         * the rest, since it is an ACF call too.
+         */
+        if (! \function_exists('acf_get_field_groups')) {
+            return [
+                'keys' => [],
+                'names' => [],
+                'defaulted_keys' => [],
+                'defaulted_names' => [],
+                'collisions' => [],
+                'identities' => [],
+            ];
+        }
+
         foreach (self::fieldGroups($location) as $group) {
             foreach (self::fields($group) as $field) {
                 $identity = self::identity($field);
