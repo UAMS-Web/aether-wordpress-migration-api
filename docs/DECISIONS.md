@@ -1425,3 +1425,16 @@ Entries are append-only in spirit: superseding one means adding a new entry that
   - The missing `vendor/` that stopped #57's run was fixed by #61, which marked the `dependencies` job `"installs": true`.
   - What remained was in `tests/Integration/bootstrap.php`. It looked for ACF PRO, the ACF custom-tables plugin, Gravity Forms, Formidable, Formidable Pro and Ninja Forms beside the checkout, which only inside `wp-content/plugins/` is the booted install's plugins directory. Outside, those tests skipped: the network process reported 400 passed and 98 skipped, against 468 passed, 29 skipped and 1 deprecated inside, 498 tests either way. It now looks in `wp-content/plugins/` under the WordPress root it boots, which for a checkout inside an install is the same directory.
 - **Ref**: #67, #60, #57, #61
+
+### D-114: Four credential-bearing options are withheld by exact names
+
+- **Decided**: on 2026-11-21, for #104. `option_denylist` gains `cfTwitterToken\_%`, and `option_denylist_nested_keys` gains `sc\_license\_key`, `sc\_license\_id`, `sc\_activation\_id`, `automatorwp\_activecampaign\_webhook` and `ics\_secret\_key`.
+- **What each protects**:
+  - `cfTwitterToken\_%`: the Twitter Tweets Widget token, stored per widget instance as `cfTwitterToken_<widget id>`. The instance suffix keeps the end-anchored `%token` from matching.
+  - `sc\_license\_key`, `sc\_license\_id`, `sc\_activation\_id`: the FlyingPress license and its paired ids, inside `flyingpress_license_options`. The key ends in `key`, which the nested list leaves out.
+  - `automatorwp\_activecampaign\_webhook`: the ActiveCampaign webhook URL inside `automatorwp_settings`. No nested pattern named a webhook.
+  - `ics\_secret\_key`: the Edit Flow calendar feed secret, inside `edit_flow_calendar_options`. It ends in `key`, not `secret`.
+- **Why exact names**: the reason `cron\_job\_key` and `purchase\_code` are exact. A `%key`, `%license%` or `%webhook%` nested pattern would also take sort columns, status labels and enable switches beside these keys, and withholding by nested key drops the whole option. A top-level `%token\_%` would take any option naming a token before an underscore. The nested rules still fire only on a non-empty string, so a blank or boolean slot is served.
+- **Measured**: `GET /options` at `v0.9.0` served all four on the production networks, read by option name and value length only. On the development network none of the four options exists, so the audit there reports no served candidate from them; the re-read against the production networks is `UAMS-Web/uams-operations#99`.
+- **Rejected**: suffix patterns (`%\_key` nested, `%token%` top-level), for the false positives above; an allowlist, which reverses the recorded failure direction and is out of scope for #104.
+- **Ref**: #104, D-032, `UAMS-Web/uams-operations#99`
