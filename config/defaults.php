@@ -266,6 +266,13 @@ return [
         // `%token\_%` would also take any option merely mentioning a token
         // before an underscore.
         'cfTwitterToken\\_%',
+
+        // WPO365's Microsoft sign-in settings (#110): the app secrets, the
+        // SAML certificate, and the tenant and application ids. Nothing in the
+        // importer or the Statamic app reads them, and the destination signs
+        // people in its own way, so the whole option is withheld by name
+        // rather than key by key.
+        'wpo365\\_options',
     ],
 
     /*
@@ -349,6 +356,15 @@ return [
         // `edit_flow_calendar_options` (#104). It ends in `key`, not `secret`,
         // so `%secret` does not see it.
         'ics\\_secret\\_key',
+        // Formidable's captcha secrets, inside `frm_options` and
+        // `frmpro_options` (#110): reCAPTCHA's `privkey`, and the hCaptcha and
+        // Turnstile equivalents. Empty or null on every network read so far, so
+        // nothing is withheld today; listed so a key filled in later is caught.
+        // Named exactly: `pubkey` sits beside each one and is public, and a
+        // `%key` suffix would also take `transient_key` (see `cron_job_key`).
+        'privkey',
+        'hcaptcha\\_privkey',
+        'turnstile\\_privkey',
     ],
 
     /*

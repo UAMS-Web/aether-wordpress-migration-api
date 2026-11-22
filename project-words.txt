@@ -97,6 +97,7 @@ gwcopycat
 gwlimitcheckboxes
 gwlimitchoices
 gwtermsofservice
+hcaptcha
 hitl
 idhi
 imagename
@@ -154,6 +155,7 @@ pmxi
 popen
 ppid
 prettypay
+privkey
 prli
 prlidt
 probebin

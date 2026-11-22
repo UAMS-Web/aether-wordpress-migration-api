@@ -243,6 +243,33 @@ it('serves the #104 settings where the named slot is empty or boolean, and harml
         ->and(OptionsPayload::classify('cfTwitterTokenCount', '3'))->toBe(OptionsPayload::VERDICT_SERVED);
 });
 
+it('withholds Formidable options carrying a captcha secret', function (string $key): void {
+    $stored = serialize([$key => '6Lc-41b8c-amber', 'pubkey' => '6Ld-public-site-key']);
+
+    expect(OptionsPayload::classify('frm_options', $stored))->toBe(OptionsPayload::VERDICT_NESTED_KEY)
+        ->and(OptionsPayload::classify('frmpro_options', $stored))->toBe(OptionsPayload::VERDICT_NESTED_KEY);
+})->with(['privkey', 'hcaptcha_privkey', 'turnstile_privkey']);
+
+it('serves Formidable options with the captcha secrets empty, null, or only the public key set', function (): void {
+    // The shape every network carried when #110 was filed: `privkey` an empty
+    // string, the hCaptcha and Turnstile keys null.
+    $today = serialize(['privkey' => '', 'pubkey' => '', 'hcaptcha_privkey' => null, 'turnstile_privkey' => null]);
+    $publicOnly = serialize(['privkey' => '', 'pubkey' => '6Ld-public-site-key', 'hcaptcha_privkey' => '', 'turnstile_privkey' => '']);
+    $queue = serialize([['transient_key' => 'image_sizer_42', 'attempts' => 1]]);
+
+    expect(OptionsPayload::classify('frm_options', $today))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('frmpro_options', $publicOnly))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify('image_sizer_queue', $queue))->toBe(OptionsPayload::VERDICT_SERVED);
+});
+
+it('withholds the WPO365 sign-in settings whatever they hold', function (): void {
+    // Withheld by name (#110), so even with every field empty.
+    $empty = serialize(['application_secret' => '', 'saml_x509_cert' => '', 'tenant_id' => '']);
+
+    expect(OptionsPayload::classify('wpo365_options', $empty))->toBe(OptionsPayload::VERDICT_NAME)
+        ->and(OptionsPayload::classify('wpo365_options_backup', $empty))->toBe(OptionsPayload::VERDICT_SERVED);
+});
+
 it('agrees with what the endpoint actually serves', function (): void {
     // The claim the sharing rests on: `classify()` is not a parallel opinion
     // about the filter, it *is* the filter. Seed one row per verdict, dispatch
