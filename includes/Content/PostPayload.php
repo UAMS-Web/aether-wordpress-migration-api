@@ -59,7 +59,7 @@ final class PostPayload
             'parent' => $post->post_parent,
             'menu_order' => $post->menu_order,
             'guid' => $post->guid,
-            'link' => (string) get_permalink($post),
+            'link' => self::link($post),
             'is_sticky' => is_sticky($post->ID),
             'ping_status' => $post->ping_status,
             'comment_status' => $post->comment_status,
@@ -257,6 +257,26 @@ final class PostPayload
         }
 
         return ['_tablepress_export_table_id' => [(string) $tableId]];
+    }
+
+    /**
+     * The post's permalink, or null when WordPress cannot compute one.
+     *
+     * A plugin that replaces core's post-status objects can make the lookup
+     * throw: WP Statuses declares `_builtin` private, and core's
+     * `is_post_status_viewable()` reads it, so every non-published page on such
+     * a site raised an `Error` and failed its whole page of results (#118).
+     * Only this call is guarded, so an error from any other read still fails
+     * the request. Null rather than `''`, so a consumer can tell a missing
+     * permalink from an empty one.
+     */
+    private static function link(WP_Post $post): ?string
+    {
+        try {
+            return (string) get_permalink($post);
+        } catch (\Error) {
+            return null;
+        }
     }
 
     /**
