@@ -1438,3 +1438,12 @@ Entries are append-only in spirit: superseding one means adding a new entry that
 - **Measured**: `GET /options` at `v0.9.0` served all four on the production networks, read by option name and value length only. On the development network none of the four options exists, so the audit there reports no served candidate from them; the re-read against the production networks is `UAMS-Web/uams-operations#99`.
 - **Rejected**: suffix patterns (`%\_key` nested, `%token%` top-level), for the false positives above; an allowlist, which reverses the recorded failure direction and is out of scope for #104.
 - **Ref**: #104, D-032, `UAMS-Web/uams-operations#99`
+
+### D-116: License keys under their plain names are withheld
+
+- **Decided**: on 2026-11-21, for #117. `option_denylist_nested_keys` gains `license\_key` and `access\_key`.
+- **What they protect**: 301 Redirects Pro's license in `wf_licensing_wf301` (`license_key` and `access_key`), and LearnDash's in `learndash_setup_wizard` (`license_key`). The nested rule withholds the option only while a key holds a non-empty string, so an unlicensed install still serves it.
+- **Why exact names**: the reason `sc\_license\_key` is exact (D-114). A `%key` suffix would also take `transient\_key` in `image_sizer_queue` and every `key` sort column.
+- **Measured**: against the `UAMS-Web/uams-operations#103` capture of 296 sites, read by name only, the two names withhold exactly `wf_licensing_wf301` on three go.uams.edu sites and `learndash_setup_wizard` on one site of another network, and nothing else. The same read for `transient\_key` finds `image_sizer_queue` on 104 sites, which shows the read can find a nested key.
+- **Rejected**: withholding both options by name, which would also drop them on an install with no license entered and needs a new entry for each licensing plugin; a `%license%` nested pattern, rejected in D-114.
+- **Ref**: #117, D-114, `UAMS-Web/uams-operations#103`
