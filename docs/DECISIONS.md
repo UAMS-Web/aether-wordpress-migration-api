@@ -1438,3 +1438,14 @@ Entries are append-only in spirit: superseding one means adding a new entry that
 - **Measured**: `GET /options` at `v0.9.0` served all four on the production networks, read by option name and value length only. On the development network none of the four options exists, so the audit there reports no served candidate from them; the re-read against the production networks is `UAMS-Web/uams-operations#99`.
 - **Rejected**: suffix patterns (`%\_key` nested, `%token%` top-level), for the false positives above; an allowlist, which reverses the recorded failure direction and is out of scope for #104.
 - **Ref**: #104, D-032, `UAMS-Web/uams-operations#99`
+
+### D-115: Formidable's captcha secrets are named, and WPO365's settings are withheld whole
+
+- **Decided**: on 2026-11-21, for #110. `option_denylist_nested_keys` gains `%privkey`; `option_denylist` gains `wpo365\_options`. The WPO365 call was made by the operator.
+- **What each protects**:
+  - `%privkey`, which matches `privkey`, `hcaptcha_privkey` and `turnstile_privkey`: Formidable's reCAPTCHA, hCaptcha and Turnstile secret keys, inside `frm_options` and `frmpro_options`. Empty or null on the networks read so far, so nothing is withheld today; the rule fires on the next read once one is filled in.
+  - `wpo365\_options`: WPO365's Microsoft sign-in settings, holding the app secrets, the SAML signing certificate and the tenant and application ids.
+- **Why a `%privkey` suffix and not `%key`**: `pubkey` sits beside each `privkey` and is public, and a `%key` nested suffix would also take `transient\_key` in `image_sizer_queue` (the reason `cron\_job\_key` is exact). A bare `privkey` entry was tried first and failed `AuditScriptGuardTest`, which requires every shipped entry to carry a `%` or a `\_` so the audit script's guard can see it.
+- **Why the whole WPO365 option**: nothing downstream reads it. A code search for `wpo365` returns 0 results in `aether-wordpress-importer` and `uams-statamic`, against 14 for `RedirectRuleGlobalCreator` with the same search, and the destination signs people in its own way. Withholding it by name ends the question of whether the certificate, which the identity provider publishes, counts as a secret.
+- **Rejected**: serving `wpo365_options` and leaving `saml_x509_cert` off the list, which keeps a settings block nothing uses; listing `saml_x509_cert` as a nested key, which treats a published certificate as a secret to withhold a block nothing uses.
+- **Ref**: #110, D-114, `UAMS-Web/uams-operations#99`
