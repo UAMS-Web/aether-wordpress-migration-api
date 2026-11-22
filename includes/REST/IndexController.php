@@ -29,6 +29,34 @@ final class IndexController extends Controller
     public function registerRoutes(): void
     {
         $this->registerReadRoute('/', [$this, 'index']);
+
+        /*
+         * The route above is unreachable over HTTP (#109). It is stored as
+         * `/uamswp-migration/v1/`, and `rest_api_loaded()` strips the trailing
+         * slash from every HTTP route, so `/wp-json/uamswp-migration/v1/`
+         * dispatches to `/uamswp-migration/v1`: the namespace index core
+         * generates, which lists routes and carries no `version`. Only internal
+         * dispatch kept the slash, so the suite passed while no consumer could
+         * read the index. Answering core's index with this one gives both
+         * paths the same payload. The namespace gate already covers core's
+         * route, so nothing is served there without authorization.
+         */
+        add_filter('rest_namespace_index', [$this, 'namespaceIndex'], 10, 2);
+    }
+
+    /**
+     * Serve this index in place of core's generated one for this namespace.
+     *
+     * @param  mixed  $response  Core's namespace index response.
+     * @param  WP_REST_Request<array<string, mixed>>  $request  The request, carrying the namespace.
+     */
+    public function namespaceIndex(mixed $response, WP_REST_Request $request): mixed
+    {
+        if ($request['namespace'] !== $this->namespace()) {
+            return $response;
+        }
+
+        return $this->index($request);
     }
 
     /**
