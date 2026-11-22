@@ -206,6 +206,22 @@ it('withholds FlyingPress license settings by each of the three license keys', f
         ->and(OptionsPayload::classify('flyingpress_license_options', $stored))->toBe(OptionsPayload::VERDICT_NESTED_KEY);
 })->with(['sc_license_key', 'sc_license_id', 'sc_activation_id']);
 
+it('withholds the 301 Redirects Pro and LearnDash license settings while a key is filled in', function (string $option, string $key, array $rest): void {
+    // #117. The synthetic value is short and punctuated so no shape rule sees
+    // it, and the unnamed control proves a pass comes from the new rule.
+    $stored = serialize([$key => 'lk-7Q2-x9'] + $rest);
+    $unnamed = serialize(['vendor_field' => 'lk-7Q2-x9'] + $rest);
+    $empty = serialize([$key => ''] + $rest);
+
+    expect(OptionsPayload::classify($option, $unnamed))->toBe(OptionsPayload::VERDICT_SERVED)
+        ->and(OptionsPayload::classify($option, $stored))->toBe(OptionsPayload::VERDICT_NESTED_KEY)
+        ->and(OptionsPayload::classify($option, $empty))->toBe(OptionsPayload::VERDICT_SERVED);
+})->with([
+    '301 Redirects Pro license_key' => ['wf_licensing_wf301', 'license_key', ['error' => '', 'valid_until' => '', 'name' => '', 'access_key' => '']],
+    '301 Redirects Pro access_key' => ['wf_licensing_wf301', 'access_key', ['license_key' => '', 'error' => '', 'valid_until' => '', 'name' => '']],
+    'LearnDash license_key' => ['learndash_setup_wizard', 'license_key', ['scene' => 'step-2', 'courses_amount' => '1-5']],
+]);
+
 it('withholds a Tweets Widget token stored under its widget instance suffix', function (): void {
     // The name ends in the instance id, so the end-anchored `%token` misses it.
     expect(OptionsPayload::classify('vendor_widget-2', 'tw-41.x'))->toBe(OptionsPayload::VERDICT_SERVED)

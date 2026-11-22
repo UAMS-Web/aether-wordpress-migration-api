@@ -1459,3 +1459,11 @@ Entries are append-only in spirit: superseding one means adding a new entry that
 - **Rejected**: catching `\Throwable` around the whole payload build; filling `link` with `guid` or a plain `?p=<id>` URL, which is a wrong value that reads as a right one.
 - **Not done**: reporting the defect to the WP Statuses tracker, out of scope for #118.
 - **Ref**: #118, D-004, `UAMS-Web/uams-operations#103`
+### D-116: License keys under their plain names are withheld
+
+- **Decided**: on 2026-11-21, for #117. `option_denylist_nested_keys` gains `license\_key` and `access\_key`.
+- **What they protect**: 301 Redirects Pro's license in `wf_licensing_wf301` (`license_key` and `access_key`), and LearnDash's in `learndash_setup_wizard` (`license_key`). The nested rule withholds the option only while a key holds a non-empty string, so an unlicensed install still serves it.
+- **Why exact names**: the reason `sc\_license\_key` is exact (D-114). A `%key` suffix would also take `transient\_key` in `image_sizer_queue` and every `key` sort column.
+- **Measured**: against the `UAMS-Web/uams-operations#103` capture of 296 sites, read by name only, the two names withhold exactly `wf_licensing_wf301` on three go.uams.edu sites and `learndash_setup_wizard` on one site of another network, and nothing else. The same read for `transient\_key` finds `image_sizer_queue` on 104 sites, which shows the read can find a nested key.
+- **Rejected**: withholding both options by name, which would also drop them on an install with no license entered and needs a new entry for each licensing plugin; a `%license%` nested pattern, rejected in D-114.
+- **Ref**: #117, D-114, `UAMS-Web/uams-operations#103`
