@@ -59,7 +59,7 @@ final class PostPayload
             'parent' => $post->post_parent,
             'menu_order' => $post->menu_order,
             'guid' => $post->guid,
-            'link' => (string) get_permalink($post),
+            'link' => self::permalink($post),
             'is_sticky' => is_sticky($post->ID),
             'ping_status' => $post->ping_status,
             'comment_status' => $post->comment_status,
@@ -257,6 +257,29 @@ final class PostPayload
         }
 
         return ['_tablepress_export_table_id' => [(string) $tableId]];
+    }
+
+    /**
+     * The post's permalink, or null when WordPress cannot compute it.
+     *
+     * `get_permalink()` can throw rather than return: on a site running WP
+     * Statuses 1.3.0-alpha, a record whose status object declares `_builtin`
+     * private makes core's `is_post_status_viewable()` raise an `Error`, and
+     * one such record would fail every record sharing its page (#118).
+     *
+     * Null, not an empty string, because core already returns an empty string
+     * for a record with no permalink, and a consumer must be able to tell "this
+     * site has none" from "this site could not compute one". Only the `Error`
+     * the read raises is caught, and only around this one call: an error from
+     * any other read still fails the request.
+     */
+    private static function permalink(WP_Post $post): ?string
+    {
+        try {
+            return (string) get_permalink($post);
+        } catch (\Error) {
+            return null;
+        }
     }
 
     /**
