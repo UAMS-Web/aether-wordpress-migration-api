@@ -98,7 +98,8 @@ defaults:
 #   download-archive -> "Check what the GitHub download holds"
 #   spell      -> "Run cspell"
 #   checks     -> the local jobs validate, synced-files, no-emoji,
-#                 aggregate-needs, pint, rector, phpstan and mutate-ignore
+#                 aggregate-needs, pint, rector, phpstan, mutate-ignore and
+#                 changed-tests
 #   mutate-ignore-breadth -> "Measure each mutation annotation's breadth"
 #   pest       -> "Run the Pest suites"
 #   node-test  -> "Run the script tests"
@@ -110,7 +111,10 @@ defaults:
 #
 # Inside the call the chain is the shared one: the four checks that need no
 # install run side by side, then Pint, then Rector and PHPStan, and the
-# mutation-annotation check.
+# mutation-annotation check. The changed-tests report (#124) runs beside them
+# once composer-validate passes: it runs a pull request's changed unit test
+# files against the base branch's source and reports each one, and fails only
+# when the comparison cannot run.
 #
 # node-test runs LAST despite needing neither Composer nor npm, matching where
 # wordpress-importer's reference implementation places it, ported rather than
@@ -431,16 +435,26 @@ jobs:
     # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
     if: vars.RUN_REMOTE_CI != 'false'
     # PARITY: mirrored by the validate, synced-files, no-emoji, aggregate-needs,
-    # pint, rector, phpstan and mutate-ignore jobs in local-ci.json, one per
-    # called job that runs, in that order. `windows-jobs` names each of them.
-    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.13.0
+    # pint, rector, phpstan, mutate-ignore and changed-tests jobs in
+    # local-ci.json, one per called job that runs, in that order.
+    # `windows-jobs` names each of them.
+    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.16.0
     with:
       # Linux and Windows for every called job that runs, and no macOS (D-108).
-      windows-jobs: composer-validate synced-files no-emoji aggregate-needs pint rector phpstan mutate-ignore
+      windows-jobs: composer-validate synced-files no-emoji aggregate-needs pint rector phpstan mutate-ignore changed-tests
       # Run below as this repository's own `pest` job, with MySQL and WordPress.
       pest: false
       # `composer mutate` needs the WordPress suite, which the called job cannot boot.
       mutate: false
+      # The changed-tests report (#124). Only the unit suite runs without
+      # WordPress; tests/Integration needs a WordPress install and a database the
+      # called job cannot provide, and its files would be reported as not run.
+      # tests/Support is named so a helper the changed tests call keeps the pull
+      # request's version rather than reverting to the base. PARITY: the same
+      # directories as the --tests arguments of the changed-tests job in
+      # local-ci.json.
+      changed-tests: true
+      changed-tests-paths: tests/Unit tests/Support
 
   mutate-ignore-breadth:
     name: Mutation annotation breadth on ${{ matrix.os }}
