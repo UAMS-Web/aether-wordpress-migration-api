@@ -360,11 +360,10 @@ return [
         // `frmpro_options` (#110): reCAPTCHA's `privkey`, and the hCaptcha and
         // Turnstile equivalents. Empty or null on every network read so far, so
         // nothing is withheld today; listed so a key filled in later is caught.
-        // Named exactly: `pubkey` sits beside each one and is public, and a
-        // `%key` suffix would also take `transient_key` (see `cron_job_key`).
-        'privkey',
-        'hcaptcha\\_privkey',
-        'turnstile\\_privkey',
+        // One `%privkey` suffix covers all three. It stops short of `%key`:
+        // `pubkey` sits beside each one and is public, and `%key` would also
+        // take `transient_key` (see `cron_job_key`).
+        '%privkey',
     ],
 
     /*
