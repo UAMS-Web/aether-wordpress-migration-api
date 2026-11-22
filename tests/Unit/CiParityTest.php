@@ -118,7 +118,8 @@ function ciCalledChainTag(): string
  * The chain's `pest` and `mutate` jobs are switched off by the call's inputs and
  * are not listed: this repository runs its Pest suites as its own `pest` job,
  * and `composer mutate` is outside the gate. The chain's optional jobs are off
- * unless an input turns them on, and the call turns none on.
+ * unless an input turns them on, and the call turns on one: `changed-tests`,
+ * from v0.16.0 (#124).
  *
  * From v0.13.0 the chain also skips its `mutate-ignore` job under
  * `mutate: false` unless the call passes `mutate-ignore: true`, which this call
@@ -137,7 +138,37 @@ function ciCalledJobs(): array
         'rector' => 'rector',
         'phpstan' => 'phpstan',
         'mutate-ignore' => 'mutate-ignore',
+        'changed-tests' => 'changed-tests',
     ];
+}
+
+/**
+ * Local jobs the runner selects from the diff rather than on every run, each
+ * because it reads only what its `paths` name and gates nothing.
+ *
+ * `changed-tests` runs a pull request's changed unit test files against the
+ * base branch's source and reports each one (#124). With no changed unit test
+ * file there is nothing for it to compare, and it builds and installs a scratch
+ * worktree on every run, so selecting it always would cost every run that time
+ * to report nothing.
+ *
+ * @return list<string>
+ */
+function ciDiffSelectedJobs(): array
+{
+    return ['changed-tests'];
+}
+
+/**
+ * The `--tests` directories a changed-tests command names, in order.
+ *
+ * @return list<string>
+ */
+function ciChangedTestsDirectories(string $command): array
+{
+    preg_match_all('/--tests (\S+)/', $command, $matches);
+
+    return $matches[1];
 }
 
 /**
@@ -492,7 +523,29 @@ it('calls the shared chain at a release tag, on Linux and Windows, with its Pest
         ->and($body)->toMatch('/^      pest: false$/m')
         ->and($body)->toMatch('/^      mutate: false$/m')
         ->and($body)->not->toMatch('/^      (all-platform-jobs|linux-only|encoding-guard|vitest|vite-build|mutation-smoke):/m')
+        ->and($body)->toMatch('/^      changed-tests: true$/m')
         ->and($windowsJobs)->toBe($calledJobs);
+});
+
+it('compares changed tests in the same directories on both sides', function (): void {
+    // The called job turns changed-tests-paths into one --tests argument per
+    // directory; the local job names them itself. A directory on one side only
+    // is a pull request whose report differs between the two runs, and a
+    // directory under tests/Integration would be reported as not run, since
+    // those tests need WordPress (#124).
+    preg_match('/^      changed-tests-paths: (.+)$/m', ciChainedJobs()[ciCallJob()], $paths);
+    $remote = explode(' ', trim($paths[1] ?? ''));
+
+    $local = [];
+
+    foreach (ciLocalConfig()['jobs'] as $job) {
+        if ($job['name'] === 'changed-tests' && \is_string($job['run'] ?? null)) {
+            $local = ciChangedTestsDirectories($job['run']);
+        }
+    }
+
+    expect($remote)->toBe(['tests/Unit', 'tests/Support'])
+        ->and($local)->toBe($remote);
 });
 
 it('runs the same jobs, in the same order, locally and remotely', function (): void {
@@ -516,17 +569,25 @@ it('runs every local job on every run, stopping at the first failure', function 
     // The shared runner selects jobs from the diff by default. A job whose
     // inputs a diff touches but whose paths do not name them is skipped, and
     // with remote CI off nothing else catches it, so every job here is always
-    // selected; `chain` mirrors the workflow's `needs:` chain.
+    // selected, except the ones ciDiffSelectedJobs() names, each of which reads
+    // only the files its paths select; `chain` mirrors the workflow's `needs:`
+    // chain.
     $local = ciLocalConfig();
     $selective = [];
+    $withoutPaths = [];
 
     foreach ($local['jobs'] as $job) {
         if (($job['always'] ?? false) !== true) {
             $selective[] = $job['name'];
+
+            if (! \is_array($job['paths'] ?? null) || $job['paths'] === []) {
+                $withoutPaths[] = $job['name'];
+            }
         }
     }
 
-    expect($selective)->toBe([])
+    expect($selective)->toBe(ciDiffSelectedJobs())
+        ->and($withoutPaths)->toBe([])
         ->and($local['config']['chain'] ?? false)->toBeTrue();
 });
 

@@ -1,5 +1,5 @@
 {
-  "_note": "The shared local CI runner's job list for this repository (#366). Every job is always selected, as the private runner it replaces ran every job on every run, and chain stops at the first failure, as ci.yml's needs: chain does. tests/Unit/CiParityTest.php holds the job order against ci.yml. ci.yml's last job, `ci`, has no counterpart here: it aggregates the remote jobs into the `CI` check the ruleset requires, and this run does not gate a merge (D-105). ci.yml's checks job calls the shared chain, whose jobs run here one by one, from validate to mutate-ignore (#49). ci.yml runs each job on ubuntu-latest and windows-latest (#25); this runs each job once, on the host's own operating system.",
+  "_note": "The shared local CI runner's job list for this repository (#366). Every job but changed-tests is always selected, as the private runner it replaces ran every job on every run, and chain stops at the first failure, as ci.yml's needs: chain does. tests/Unit/CiParityTest.php holds the job order against ci.yml. ci.yml's last job, `ci`, has no counterpart here: it aggregates the remote jobs into the `CI` check the ruleset requires, and this run does not gate a merge (D-105). ci.yml's checks job calls the shared chain, whose jobs run here one by one, from validate to changed-tests (#49, #124). ci.yml runs each job on ubuntu-latest and windows-latest (#25); this runs each job once, on the host's own operating system.",
   "_prepare": "patches is off: prepare runs before any job, so it would reinstall the slot's old package versions against the commit's patches. The dependencies job installs first and re-syncs patches second, as the private runner did.",
   "base": "main",
   "php": "8.4",
@@ -115,6 +115,13 @@
       "_note": "Fails naming a bare or inert @pest-mutate-ignore annotation; the called chain's mutate-ignore job ran it until v0.13.0, which skips that job under `mutate: false` unless the call passes `mutate-ignore: true` (#49, #81). The paths are named for two reasons: the called job passes none, so it reads `tests` alone here while every annotation in this repository is under includes/, which mutate-ignore-breadth reads remotely; and the default `tests` walks into tests/Integration/vendor, which a reused slot has and a cold checkout does not, and whose pest-plugin-mutate carries markers of its own. No vendor requirement, for the reason the spell job gives.",
       "run": "php .claude/skills/pest-testing/scripts/check-mutate-ignore.php includes tests/Unit tests/Support tests/Integration/Feature tests/Integration/Mutate",
       "always": true
+    },
+    {
+      "name": "changed-tests",
+      "_note": "Runs the pull request's changed unit test files against the base branch's source and reports each one; it fails only when the comparison cannot run (#124). Selected by a changed unit test file rather than always: nothing else is compared, and the scratch install it makes is not quick. The --tests directories are the ones ci.yml's call passes as changed-tests-paths: only tests/Unit runs without WordPress, and tests/Support keeps the pull request's helpers beside the changed tests.",
+      "run": "node .claude/skills/pest-testing/scripts/changed-tests-against-base.mjs --base origin/main --tests tests/Unit --tests tests/Support",
+      "paths": ["tests/Unit/**/*Test.php"],
+      "requires": ["bin:node", "bin:git", "bin:composer"]
     },
     {
       "name": "mutate-ignore-breadth",
