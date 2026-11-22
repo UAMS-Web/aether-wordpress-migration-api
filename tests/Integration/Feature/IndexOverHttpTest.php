@@ -28,20 +28,30 @@ it('reports the plugin version on the route an HTTP request reaches', function (
         ->and(payload($response, 'name'))->toBe('UAMSWP Migration API');
 });
 
-it('serves the same index on both namespace roots', function (): void {
+it('serves the whole plugin index on the HTTP root and keeps core route list', function (): void {
     actAsSuperAdmin();
 
     $http = rest_do_request(new WP_REST_Request('GET', '/uamswp-migration/v1'))->get_data();
     $internal = rest_do_request(new WP_REST_Request('GET', '/uamswp-migration/v1/'))->get_data();
 
-    expect($http)->toBe($internal);
+    assert(is_array($http) && is_array($internal));
+
+    // Every key the internal route serves, with the same value, plus core's
+    // `namespace` and `routes`, which other tests and readers rely on.
+    expect(array_intersect_key($http, $internal))->toBe($internal)
+        ->and($http)->toHaveKey('namespace', 'uamswp-migration/v1')
+        ->and($http)->toHaveKey('routes');
 });
 
 it('leaves another namespace index as core builds it', function (): void {
     actAsSuperAdmin();
 
     $response = rest_do_request(new WP_REST_Request('GET', '/wp/v2'));
+    $data = $response->get_data();
+
+    assert(is_array($data));
 
     expect($response->get_status())->toBe(200)
-        ->and(payload($response, 'namespace'))->toBe('wp/v2');
+        ->and($data['namespace'] ?? null)->toBe('wp/v2')
+        ->and($data)->not->toHaveKey('version');
 });

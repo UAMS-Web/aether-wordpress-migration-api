@@ -16,7 +16,7 @@ The fields of each record are on [Response shapes](Response-shapes.md); the erro
 
 | Route | Paginated | Returns |
 | --- | --- | --- |
-| `/` | no | The namespace root, `/wp-json/uamswp-migration/v1` with or without the trailing slash, in place of the route list WordPress generates for a namespace ([#109](https://github.com/UAMS-Web/aether-wordpress-migration-api/issues/109)). The plugin name and its release version from the plugin header, the site that answered, the exposed post types and taxonomies, the pagination defaults, and each route family with its parameters and an `available` flag for the form and redirect plugins. |
+| `/` | no | The namespace root, `/wp-json/uamswp-migration/v1` with or without the trailing slash; over HTTP it also carries the `namespace` and `routes` WordPress generates for a namespace ([#109](https://github.com/UAMS-Web/aether-wordpress-migration-api/issues/109)). The plugin name and its release version from the plugin header, the site that answered, the exposed post types and taxonomies, the pagination defaults, and each route family with its parameters and an `available` flag for the form and redirect plugins. |
 | `/sites` | no | Every site on the network (one entry on a single site), by ID, with the WXR channel fields and record counts. |
 | `/post-types` | no | Every registered post type, with whether it is exposed and its counts by status. Refuses `site` naming another site. |
 | `/taxonomies` | no | Every registered taxonomy, with whether it is exposed and its term count. Refuses `site` naming another site. |
