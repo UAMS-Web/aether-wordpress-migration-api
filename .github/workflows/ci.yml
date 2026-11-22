@@ -433,7 +433,7 @@ jobs:
     # PARITY: mirrored by the validate, synced-files, no-emoji, aggregate-needs,
     # pint, rector, phpstan and mutate-ignore jobs in local-ci.json, one per
     # called job that runs, in that order. `windows-jobs` names each of them.
-    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.13.0
+    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.14.0
     with:
       # Linux and Windows for every called job that runs, and no macOS (D-108).
       windows-jobs: composer-validate synced-files no-emoji aggregate-needs pint rector phpstan mutate-ignore
