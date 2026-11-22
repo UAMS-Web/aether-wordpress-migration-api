@@ -216,6 +216,7 @@ The shared workflow (`templates/ci-reusable.yml`, published as `UAMS-Web/uams-ci
 | Spell check, submodule pointer guard, test isolation guard (pilot job types) | Linux only | Decided 2026-11-02: they read the same files the same way on any platform. |
 | Browser smoke (`CP browser smoke (Pest + Playwright)`, pilot job type) | Linux only | Decided 2026-11-02: no test under `tests/Browser` branches on the operating system. |
 | `guard`, `dev-lint` (the optional repository jobs, UAMS-Web/uams-claude-skills#620) | Linux only | Decided on #620 from what each job reads, with no seeded fault run: the guard matches the names `git ls-files` prints against patterns, and `dev-lint` runs `php -l` over source under one PHP version. A caller that wants a Windows or macOS leg names the job in `all-platform-jobs`. |
+| `changed-tests` (UAMS-Web/uams-claude-skills#876) | Linux only | Decided on #876 from what the job reads, with no seeded fault run: the script diffs with git and runs the changed Pest files once, and its report is the same on any platform. |
 | `floor-lint`, `download-archive`, `phpcs` (the plugin jobs, UAMS-Web/uams-claude-skills#607) | Linux only | Decided on #607 from what each job reads, with no seeded fault run: the floor lint parses shipped PHP under one pinned PHP version, the download check runs `git archive` on `HEAD` over a repository that pins line endings, and phpcs reads PHP source and its own ruleset. The plugin template ran all three on `ubuntu-latest` only before the chain carried them, so no coverage is lost. A caller that wants a Windows or macOS leg names the job in `all-platform-jobs`. |
 | `pest` (the suite, and the pilot's parallel band shards and serial group) | All three | The suite is what runs on the platforms the code ships to. |
 | `mutate-ignore` | All three | `check-mutate-ignore.php` has a branch for a CRLF runtime (its docblock names a trailing marker on one), and a Windows checkout can be CRLF. |
@@ -337,7 +338,7 @@ The aggregate `CI` job lists `mutate` in its `needs:` like every other job, so t
 
 #### Adding the changed-tests report
 
-The `pest-testing` skill's `scripts/changed-tests-against-base.mjs` runs a pull request's changed test files against the base branch's source and reports per file (that skill's *Changed tests against base* says what the report means). It is not in the template: a repository adopts it in its own change. In `ci.yml`, beside the `checks` call, add a plain job such as the one below and list it in the `needs:` of `CI` (the `aggregate-needs` check fails otherwise):
+The `pest-testing` skill's `scripts/changed-tests-against-base.mjs` runs a pull request's changed test files against the base branch's source and reports per file (that skill's *Changed tests against base* says what the report means). A repository that calls the shared workflow turns the report on with an input (below). A repository that runs its own workflow adopts it in its own change: in `ci.yml`, beside the `checks` call where it has one, add a plain job such as the one below and list it in the `needs:` of `CI` (the `aggregate-needs` check fails otherwise):
 
 ```yaml
   changed-tests:
@@ -358,6 +359,8 @@ The `pest-testing` skill's `scripts/changed-tests-against-base.mjs` runs a pull 
 - **No `${{ }}` expression in `run:`.** The base branch's name reaches the script through the environment, not through the command.
 - The job goes in the aggregate `CI` job's `needs:` like every other job. It always succeeds once its report is written, so it gates nothing but a comparison that could not run.
 - The report is written to the job summary as well as the log.
+
+**A repository that calls the shared workflow** passes `changed-tests: true` to the call instead of carrying the job above, and `changed-tests-paths` when some of its test directories need a host application (the importer's value is `tests/Unit tests/Integration`; the default is `tests`). The chain's job is gated on that input, so it is skipped when off and the `CI` result accepts the skip. It has the same checkout depth, the same lack of expressions in `run:`, and the same report, and it reports and never gates. It needs the `pest-testing` skill's script and the caller's `./.github/actions/setup`, as the other jobs do (UAMS-Web/uams-claude-skills#876, decided on #865).
 
 In `local-ci.json`, where the runner gates jobs on the diff:
 
