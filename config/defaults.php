@@ -348,6 +348,13 @@ return [
         'sc\\_license\\_key',
         'sc\\_license\\_id',
         'sc\\_activation\\_id',
+        // A license key under its plain name (#117): 301 Redirects Pro's
+        // `wf_licensing_wf301` holds `license_key` and `access_key`, and
+        // LearnDash's `learndash_setup_wizard` holds `license_key`. Named
+        // exactly for the reason `sc_license_key` is: `%key` would take
+        // `transient_key` and every `key` sort column.
+        'license\\_key',
+        'access\\_key',
         // The ActiveCampaign webhook URL inside `automatorwp_settings` (#104).
         // A webhook URL carries its own secret. Named exactly: a `%webhook%`
         // pattern would also take the boolean switches that enable a webhook.
