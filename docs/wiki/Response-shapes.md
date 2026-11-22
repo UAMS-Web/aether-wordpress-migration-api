@@ -10,7 +10,8 @@ Values are returned raw: as stored, un-resolved and un-composed. Nothing is rend
 | `author` | `{id, login, display_name}`; `login` and `display_name` are `null` when the author matches no user. |
 | `date_created`, `date_created_gmt`, `date_modified`, `date_modified_gmt` | The post's dates, local and GMT. |
 | `content`, `excerpt` | Stored content, not rendered. |
-| `parent`, `menu_order`, `guid`, `link`, `is_sticky`, `ping_status`, `comment_status`, `post_password` | The remaining columns WXR carries. |
+| `parent`, `menu_order`, `guid`, `is_sticky`, `ping_status`, `comment_status`, `post_password` | The remaining columns WXR carries. |
+| `link` | The permalink, as a string (empty when WordPress has none). `null` when WordPress threw while computing it, as it does for a record whose status object a plugin has replaced with one that hides `_builtin`; the rest of the record is served unchanged. |
 | `terms` | A map of taxonomy to `[{term_id, slug, name, parent, description}]`, for exposed taxonomies only. |
 | `attachment` | `null` except on attachments: `{url, mime_type, file, alt, metadata}`, with `file` relative to the uploads folder. |
 | `meta` | Every postmeta row exactly as stored, as `key: [values]`. Underscore-prefixed keys are included. A TablePress table also carries `_tablepress_export_table_id`, which the API adds. |

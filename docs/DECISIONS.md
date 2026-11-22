@@ -1449,3 +1449,13 @@ Entries are append-only in spirit: superseding one means adding a new entry that
 - **Why the whole WPO365 option**: nothing downstream reads it. A code search for `wpo365` returns 0 results in `aether-wordpress-importer` and `uams-statamic`, against 14 for `RedirectRuleGlobalCreator` with the same search, and the destination signs people in its own way. Withholding it by name ends the question of whether the certificate, which the identity provider publishes, counts as a secret.
 - **Rejected**: serving `wpo365_options` and leaving `saml_x509_cert` off the list, which keeps a settings block nothing uses; listing `saml_x509_cert` as a nested key, which treats a published certificate as a secret to withhold a block nothing uses.
 - **Ref**: #110, D-114, `UAMS-Web/uams-operations#99`
+
+### D-117: A permalink that throws is served as `link: null`
+
+- **Decided**: on 2026-11-22, for #118. `PostPayload::permalink()` wraps the one `get_permalink()` call in a `catch (\Error)` and returns `null`; every other field of the record is served as before.
+- **Why**: on news.uams.edu, WP Statuses `1.3.0-alpha` replaces core's post-status objects with `WP_Statuses_Core_Status`, which declares `_builtin` private. Core's `is_post_status_viewable()` reads it, so `get_permalink()` raised an `Error` for any non-published page or attachment, and one such record answered `500` for every record on its page.
+- **Why `null`**: core already returns an empty string for a record with no permalink, so an empty string cannot also mean "could not be computed". A consumer tests `link === null`.
+- **Why only `\Error`, only around that call**: a broader catch would turn an unrelated failure in any other read into a served record with a wrong or missing field, the failure mode D-004 and the design rules exist to prevent. A test pins that an error raised by another read still fails the request.
+- **Rejected**: catching `\Throwable` around the whole payload build; filling `link` with `guid` or a plain `?p=<id>` URL, which is a wrong value that reads as a right one.
+- **Not done**: reporting the defect to the WP Statuses tracker, out of scope for #118.
+- **Ref**: #118, D-004, `UAMS-Web/uams-operations#103`
