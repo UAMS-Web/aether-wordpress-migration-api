@@ -108,7 +108,7 @@ function ciCallJob(): string
  */
 function ciCalledChainTag(): string
 {
-    return 'v0.13.0';
+    return 'v0.16.0';
 }
 
 /**
