@@ -4,7 +4,7 @@
  * Plugin Name:       Aether WordPress Migration API
  * Plugin URI:        https://github.com/UAMS-Web/aether-wordpress-migration-api
  * Description:       Read-only migration API serving raw, current WordPress content to the Statamic importer. Temporary — remove when the migration completes.
- * Version:           0.11.0
+ * Version:           0.11.1
  * Requires at least: 6.8
  * Requires PHP:      8.2
  * Author:            UAMS Web Services
