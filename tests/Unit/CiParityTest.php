@@ -105,10 +105,15 @@ function ciCallJob(): string
  * ci.yml fails the call's test until this moves too, which is the point at
  * which the list below is read again against the new tag: a job the new tag
  * adds would otherwise run on Linux alone, missing from `windows-jobs`.
+ *
+ * From v0.17.0 that holds for every job, including the four (`pest`,
+ * `mutate-ignore`, `vitest`, `mutation-smoke`) that ran on every runner
+ * before: `linux-only` now defaults to true, so only `windows-jobs` gives a
+ * job its Windows leg (#130).
  */
 function ciCalledChainTag(): string
 {
-    return 'v0.16.0';
+    return 'v0.17.0';
 }
 
 /**

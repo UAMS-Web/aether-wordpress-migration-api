@@ -438,9 +438,13 @@ jobs:
     # pint, rector, phpstan, mutate-ignore and changed-tests jobs in
     # local-ci.json, one per called job that runs, in that order.
     # `windows-jobs` names each of them.
-    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.16.0
+    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.17.0
     with:
       # Linux and Windows for every called job that runs, and no macOS (D-108).
+      # From v0.17.0 `linux-only` defaults to true, which takes the extra legs
+      # from a job this list does not name (#130). The list names every called
+      # job that runs, so no job loses its Windows leg, and `linux-only` is
+      # left at its default.
       windows-jobs: composer-validate synced-files no-emoji aggregate-needs pint rector phpstan mutate-ignore changed-tests
       # Run below as this repository's own `pest` job, with MySQL and WordPress.
       pest: false
