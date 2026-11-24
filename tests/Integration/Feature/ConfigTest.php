@@ -287,9 +287,13 @@ it('merges a config/local.php beside the defaults over them', function (): void 
 
 it('reads the identifiers for a post type, dropping a malformed entry', function (): void {
     // D-104. A malformed entry is a fact about the configuration, so it is
-    // dropped rather than served as an empty identifier on every record.
+    // dropped rather than served as an empty identifier on every record. The
+    // numeric key and the non-array entry come FIRST, so that stopping at one
+    // of them instead of skipping it loses every entry after it (#136).
     $filter = static fn (array $config): array => ['identifiers' => [
         'thing' => [
+            7 => ['meta' => '_numeric_key'],
+            'not_an_array' => 'meta',
             'from_meta' => ['meta' => '_thing_id'],
             'from_list' => ['acf_list' => 'thing_rows', 'column' => 'thing_row_id'],
             'first_source_wins' => ['acf' => 'thing_field', 'meta' => '_thing_meta'],
@@ -298,8 +302,6 @@ it('reads the identifiers for a post type, dropping a malformed entry', function
             'list_with_odd_column' => ['acf_list' => 'thing_rows', 'column' => ['x']],
             'empty_name' => ['meta' => ''],
             'no_source' => ['column' => 'x'],
-            'not_an_array' => 'meta',
-            7 => ['meta' => '_numeric_key'],
         ],
         'broken' => 'meta',
     ]] + $config;
