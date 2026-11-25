@@ -76,9 +76,7 @@
         ],
         "mutate": [
             "Composer\\Config::disableProcessTimeout",
-            "@php tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml --test-directory=. --mutate --covered-only --path=includes/Pagination.php",
-            "@php tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml --test-directory=. --mutate --covered-only --path=includes/Config.php",
-            "@php tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml --test-directory=. --mutate --covered-only --path=includes/Auth.php"
+            "@php tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml --test-directory=. --mutate --covered-only --path=includes/Pagination.php,includes/Config.php,includes/Auth.php"
         ],
         "stan": "phpstan analyze --no-progress --memory-limit=2G",
         "refactor": "rector",

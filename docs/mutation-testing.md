@@ -12,7 +12,7 @@ The shared chain's `mutate` job runs `composer mutate` on a pull request or a pu
 
 ## A hand-run pass takes the same shape as `composer mutate`
 
-`composer mutate` runs one pass per class from the Integration suite's own Composer setup (D-092), each `@php tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml --test-directory=. --mutate --covered-only --path=includes/<File>.php`, for `Pagination`, `Config` and `Auth` ([`composer.json`](../composer.json)). The mutate plugin and its patches live in that setup, not the root one, so a pass run by hand, for example under Herd's bundled Xdebug, uses the same binary and the same two options:
+`composer mutate` runs one pass from the Integration suite's own Composer setup (D-092), `@php tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml --test-directory=. --mutate --covered-only --path=includes/Pagination.php,includes/Config.php,includes/Auth.php` ([`composer.json`](../composer.json)). A `--path` after it replaces that list, which is how the CI job mutates only the changed files. The mutate plugin and its patches live in that setup, not the root one, so a pass run by hand, for example under Herd's bundled Xdebug, uses the same binary and the same two options:
 
 ```bash
 php -d zend_extension=/Applications/Herd.app/Contents/Resources/xdebug/xdebug-84-arm64.so \
