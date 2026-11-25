@@ -39,15 +39,22 @@ defaults:
 # `Chain result` job, which fails unless each of them succeeded:
 #
 #   composer-validate, synced-files, no-emoji, aggregate-needs, pint, rector,
-#   phpstan, mutate-ignore
+#   phpstan, mutate-ignore, changed-tests, mutate
 #
-# Two of the chain's jobs are switched off with inputs, and run here instead:
+# One of the chain's jobs is switched off with an input, and runs here instead:
 #
 #   - `pest: false`. The called `pest` job runs `composer test` with no MySQL
 #     and no WordPress tree, and four of this repository's five Pest processes
 #     boot WordPress against MySQL. The `pest` job below stays.
-#   - `mutate: false`. `composer mutate` runs the WordPress suite too, and was
-#     not part of this workflow before the call.
+#
+# The `mutate` job (#141, D-118) runs `composer mutate` on whichever of the
+# three files D-023 scopes it to a pull request or a push changes, and passes
+# with nothing to mutate when it changes none of them. Its result gates `CI`.
+# `mutate-paths` names those files and not `includes/`, where most classes have
+# recorded survivors. `composer mutate` boots WordPress, so the call
+# passes `mutate-wordpress: true`, which stands up MySQL, WordPress and the
+# Integration suite's Composer setup inside that job. It runs on Linux only,
+# whatever `windows-jobs` says, and `local-ci.json` has no counterpart for it.
 #
 # The jobs the chain has no counterpart for stay as plain jobs: the WordPress
 # guards (`load-guard`, `lint-floor`, `floor-functions`, `download-archive`),
@@ -134,7 +141,8 @@ defaults:
 # TWO OPERATING SYSTEMS (#25, D-108). Every link in the chain runs on
 # `ubuntu-latest` and `windows-latest`. A plain job does it as a matrix on
 # `os` that is not fail-fast; the call does it with its `windows-jobs` input,
-# which names every called job that runs and gives each a Linux and a Windows
+# which names every called job that runs, except the Linux-only `mutate`, and
+# gives each a Linux and a Windows
 # leg and no macOS leg. `needs:` names a job id, so each link waits for both
 # legs of the one before it, and `CI` reads each job's combined result, which
 # is `success` only when both legs succeeded. `tests/Unit/CiParityTest.php`
@@ -455,20 +463,25 @@ jobs:
     if: vars.RUN_REMOTE_CI != 'false' && !cancelled() && (github.event_name == 'schedule' || needs.spell.result == 'success')
     # PARITY: mirrored by the validate, synced-files, no-emoji, aggregate-needs,
     # pint, rector, phpstan, mutate-ignore and changed-tests jobs in
-    # local-ci.json, one per called job that runs, in that order.
+    # local-ci.json, one per called job that runs except `mutate`, in that order.
     # `windows-jobs` names each of them.
-    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.17.0
+    uses: UAMS-Web/uams-ci-workflows/.github/workflows/ci.yml@v0.18.0
     with:
       # Linux and Windows for every called job that runs, and no macOS (D-108).
       # From v0.17.0 `linux-only` defaults to true, which takes the extra legs
       # from a job this list does not name (#130). The list names every called
-      # job that runs, so no job loses its Windows leg, and `linux-only` is
-      # left at its default.
+      # job that runs except `mutate`, whose legs are Linux only whatever the
+      # caller passes, and `linux-only` is left at its default.
       windows-jobs: composer-validate synced-files no-emoji aggregate-needs pint rector phpstan mutate-ignore changed-tests
       # Run below as this repository's own `pest` job, with MySQL and WordPress.
       pest: false
-      # `composer mutate` needs the WordPress suite, which the called job cannot boot.
-      mutate: false
+      # `composer mutate` boots WordPress, so the job stands that up first
+      # (#141). The suite chooses a network itself, and the WordPress version
+      # and database image defaults match the `pest` job below.
+      mutate-wordpress: true
+      # The three files D-023 scopes `composer mutate` to, not `includes/`. A
+      # class is added once a pass over it leaves no survivor (D-118).
+      mutate-paths: includes/Pagination.php includes/Config.php includes/Auth.php
       # The changed-tests report (#124). Only the unit suite runs without
       # WordPress; tests/Integration needs a WordPress install and a database the
       # called job cannot provide, and its files would be reported as not run.

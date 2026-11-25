@@ -113,22 +113,19 @@ function ciCallJob(): string
  */
 function ciCalledChainTag(): string
 {
-    return 'v0.17.0';
+    return 'v0.18.0';
 }
 
 /**
  * The called chain's jobs that run at ciCalledChainTag(), each with the local
  * job that mirrors it, in the order the local runner runs them.
  *
- * The chain's `pest` and `mutate` jobs are switched off by the call's inputs and
- * are not listed: this repository runs its Pest suites as its own `pest` job,
- * and `composer mutate` is outside the gate. The chain's optional jobs are off
- * unless an input turns them on, and the call turns on one: `changed-tests`,
- * from v0.16.0 (#124).
- *
- * From v0.13.0 the chain also skips its `mutate-ignore` job under
- * `mutate: false` unless the call passes `mutate-ignore: true`, which this call
- * does not (#81). The local `mutate-ignore` job still runs it.
+ * The chain's `pest` job is switched off by the call's input and is not listed:
+ * this repository runs its Pest suites as its own `pest` job. Its `mutate` job
+ * runs (#141) and is not listed either: it runs on Linux alone whatever
+ * `windows-jobs` names, and `composer mutate` is outside the local chain. The
+ * chain's optional jobs are off unless an input turns them on, and the call
+ * turns on one: `changed-tests`, from v0.16.0 (#124).
  *
  * @return array<string, string>
  */
@@ -145,6 +142,32 @@ function ciCalledJobs(): array
         'mutate-ignore' => 'mutate-ignore',
         'changed-tests' => 'changed-tests',
     ];
+}
+
+/**
+ * The files `composer mutate` covers, in the order its commands name them.
+ *
+ * @return list<string>
+ */
+function ciMutatedFiles(): array
+{
+    $composer = json_decode((string) file_get_contents(\dirname(__DIR__, 2).'/composer.json'), true);
+    $scripts = \is_array($composer) ? ($composer['scripts'] ?? null) : null;
+    $commands = \is_array($scripts) ? ($scripts['mutate'] ?? null) : null;
+
+    $files = [];
+
+    foreach (\is_array($commands) ? $commands : [$commands] as $command) {
+        if (\is_string($command) && preg_match('/ --path=(\S+)/', $command, $path) === 1) {
+            array_push($files, ...explode(',', $path[1]));
+        }
+    }
+
+    if ($files === []) {
+        throw new RuntimeException('composer.json has no "mutate" script that names a --path.');
+    }
+
+    return $files;
 }
 
 /**
@@ -524,15 +547,15 @@ it('runs every chained job on both Linux and Windows', function (): void {
         ->and($missingLeg)->toBe([]);
 });
 
-it('calls the shared chain at a release tag, on Linux and Windows, with its Pest and mutation jobs off', function (): void {
+it('calls the shared chain at a release tag, on Linux and Windows, with its Pest job off and its mutation job on', function (): void {
     // A branch reference would let a change to the shared chain reach this
     // repository without a change here. The call has no matrix of its own: its
     // `windows-jobs` input gives each named job a Linux and a Windows leg and
     // no macOS leg, so a called job missing from it runs on Linux alone and
     // takes Windows out of the gate with nothing failing (D-108).
     // `all-platform-jobs` and `linux-only` would add macOS legs or remove the
-    // Windows ones. The chain's `pest` job cannot boot WordPress, and its
-    // `mutate` job runs `composer mutate`, which needs it too.
+    // Windows ones. The chain's `pest` job cannot boot WordPress; its
+    // `mutate` job can, with `mutate-wordpress` (#141), and is on by default.
     $body = ciChainedJobs()[ciCallJob()];
 
     preg_match('/^      windows-jobs: (.+)$/m', $body, $windows);
@@ -541,9 +564,16 @@ it('calls the shared chain at a release tag, on Linux and Windows, with its Pest
     $calledJobs = array_keys(ciCalledJobs());
     sort($calledJobs);
 
+    // A path the job selects and `composer mutate` does not cover would be
+    // scored on a changed file and left out of every full pass (D-118).
+    preg_match('/^      mutate-paths: (.+)$/m', $body, $paths);
+    $mutatePaths = explode(' ', trim($paths[1] ?? ''));
+
     expect($body)->toMatch('#^    uses: UAMS-Web/uams-ci-workflows/\.github/workflows/ci\.yml@'.preg_quote(ciCalledChainTag(), '#').'$#m')
         ->and($body)->toMatch('/^      pest: false$/m')
-        ->and($body)->toMatch('/^      mutate: false$/m')
+        ->and($body)->not->toMatch('/^      mutate:/m')
+        ->and($body)->toMatch('/^      mutate-wordpress: true$/m')
+        ->and($mutatePaths)->toBe(ciMutatedFiles())
         ->and($body)->not->toMatch('/^      (all-platform-jobs|linux-only|encoding-guard|vitest|vite-build|mutation-smoke):/m')
         ->and($body)->toMatch('/^      changed-tests: true$/m')
         ->and($windowsJobs)->toBe($calledJobs);
