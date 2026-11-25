@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Multisite scoping.
+ * Multisite site scoping.
  */
 
 declare(strict_types=1);
