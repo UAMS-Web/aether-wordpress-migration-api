@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The configuration surface.
+ * Configuration surface.
  */
 
 declare(strict_types=1);

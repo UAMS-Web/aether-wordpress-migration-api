@@ -29,7 +29,7 @@ final class Pagination
     private function __construct(public readonly int $page, public readonly int $perPage) {}
 
     /**
-     * Build from a REST request, applying the defaults and bounds.
+     * Build from a REST request, applying defaults and bounds.
      *
      * @param  WP_REST_Request<array<string, mixed>>  $request  Incoming request.
      */
