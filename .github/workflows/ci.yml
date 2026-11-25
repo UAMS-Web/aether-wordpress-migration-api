@@ -7,9 +7,15 @@ on:
   # Lets the chain be run on demand against a branch, rather than only on a
   # pull request or a push to main.
   workflow_dispatch:
+  # The full mutation pass, weekly (Mondays at 07:37 UTC, #135). See SCHEDULED
+  # RUNS in the header for the jobs it starts.
+  schedule:
+    - cron: '37 7 * * 1'
 
+# A scheduled run gets a group of its own: in the one it would share with a push
+# to main, the long pass would hold that push's run in the queue.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ github.event_name == 'schedule' && '-schedule' || '' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Nothing here writes. Stated rather than inherited, so a job added later starts
@@ -43,7 +49,8 @@ defaults:
 #
 # The `mutate` job (#141, D-118) runs `composer mutate` on whichever of the
 # three files D-023 scopes it to a pull request or a push changes, and passes
-# with nothing to mutate when it changes none of them. Its result gates `CI`.
+# with nothing to mutate when it changes none of them. A scheduled or manually
+# dispatched run mutates all three. Its result gates `CI`.
 # `mutate-paths` names those files and not `includes/`, where most classes have
 # recorded survivors. `composer mutate` boots WordPress, so the call
 # passes `mutate-wordpress: true`, which stands up MySQL, WordPress and the
@@ -153,6 +160,16 @@ defaults:
 # Windows; and the WordPress download converts `RUNNER_TEMP` with `cygpath`
 # where it exists. The `CI` job itself runs once, on Linux.
 #
+# SCHEDULED RUNS (#135). The `schedule:` trigger runs on the default branch
+# only, for the full mutation pass over the three files `mutate-paths` names,
+# and starts the `checks` call and `CI`, nothing else. The plain jobs would
+# repeat what the push to `main` already ran on the same commit, so
+# `load-guard`, the head of the chain, and `mutate-ignore-breadth`, the first
+# job after the call, are off on a schedule; the jobs after each of them are
+# skipped with it. `checks` therefore does not wait for `spell` there. `CI`
+# reads the call's result alone on a schedule, because every other job is
+# skipped by design.
+#
 # Two deliberate differences in the local run: every job is always selected
 # rather than chosen from the diff, and `mutate-ignore` names its paths. The
 # called job passes none, so it reads whichever of `app`, `src` and `tests`
@@ -215,8 +232,9 @@ jobs:
     # First (cheapest) link in the cost-ordered chain: every other job runs
     # downstream via `needs:`, so a failure here skips — and never bills for —
     # the entire rest of the pipeline.
-    # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
-    if: vars.RUN_REMOTE_CI != 'false'
+    # Budget kill-switch (see the RUN_REMOTE_CI note in the header), and off on a
+    # schedule (see SCHEDULED RUNS).
+    if: vars.RUN_REMOTE_CI != 'false' && github.event_name != 'schedule'
     # The plugin keeps a hand-rolled autoloader specifically so it runs on a
     # stock WordPress install with no Composer artifacts (D-012). A single
     # `require __DIR__.'/vendor/autoload.php'` breaks that silently: it keeps
@@ -440,8 +458,11 @@ jobs:
     # CI chain: runs only after the spell check passes. Pint MUST come before
     # Rector, and the called chain orders them so.
     needs: spell
-    # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
-    if: vars.RUN_REMOTE_CI != 'false'
+    # Budget kill-switch (see the RUN_REMOTE_CI note in the header). `spell` is
+    # skipped on a schedule (see SCHEDULED RUNS), which would skip this job too
+    # without a status function; `!cancelled()` is the one that still lets a
+    # cancelled run stop here, and the `spell` result keeps the chain otherwise.
+    if: vars.RUN_REMOTE_CI != 'false' && !cancelled() && (github.event_name == 'schedule' || needs.spell.result == 'success')
     # PARITY: mirrored by the validate, synced-files, no-emoji, aggregate-needs,
     # pint, rector, phpstan, mutate-ignore and changed-tests jobs in
     # local-ci.json, one per called job that runs except `mutate`, in that order.
@@ -484,8 +505,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     # CI chain: runs only after the called chain passes.
     needs: checks
-    # Budget kill-switch (see the RUN_REMOTE_CI note in the header).
-    if: vars.RUN_REMOTE_CI != 'false'
+    # Budget kill-switch (see the RUN_REMOTE_CI note in the header), and off on a
+    # schedule (see SCHEDULED RUNS).
+    if: vars.RUN_REMOTE_CI != 'false' && github.event_name != 'schedule'
     # Measures each `@pest-mutate-ignore` with the installed pest-plugin-mutate
     # and fails, naming the file and line, when one removes other than one
     # mutant per mutator it names (#31). The text check cannot see either case:
@@ -728,9 +750,10 @@ jobs:
     timeout-minutes: 5
     steps:
       # `skipped` and `cancelled` fail as well as `failure`: a job that did not run proved nothing.
+      # A scheduled run starts the `checks` call alone (see SCHEDULED RUNS), so it reads that result alone.
       - name: Every needed job succeeded
         env:
-          RESULTS: ${{ join(needs.*.result, ' ') }}
+          RESULTS: ${{ github.event_name == 'schedule' && needs.checks.result || join(needs.*.result, ' ') }}
         run: |
           echo "Needed job results: $RESULTS"
           for result in $RESULTS; do

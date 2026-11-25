@@ -502,6 +502,23 @@ it('aggregates every chained job into the required CI check', function (): void 
         ->and($needed[1])->toBe(ciWorkflowChain());
 });
 
+it('starts the shared call and the aggregate, and no plain job, on a schedule', function (): void {
+    // A scheduled run is for the full mutation pass (#135), and repeats nothing
+    // the push to `main` already ran on the same commit. The head of the chain
+    // and the first job after the call are off on a schedule, and the others
+    // skip with them. `checks` needs a status function, or the skipped `spell`
+    // skips it too, and `CI` reads its result alone, or it fails every run.
+    $jobs = ciChainedJobs();
+    $workflow = ciWorkflowSource();
+    $off = "if: vars.RUN_REMOTE_CI != 'false' && github.event_name != 'schedule'";
+    $gated = array_keys(array_filter($jobs, static fn (string $body): bool => str_contains($body, $off)));
+
+    expect($workflow)->toMatch("/^  schedule:\n    - cron: '\\d+ \\d+ \\* \\* [0-6]'$/m")
+        ->and($gated)->toBe(['load-guard', 'mutate-ignore-breadth'])
+        ->and($jobs[ciCallJob()])->toContain("!cancelled() && (github.event_name == 'schedule' || needs.spell.result == 'success')")
+        ->and(ciWorkflowJobs()[ciAggregateJob()])->toContain("RESULTS: \${{ github.event_name == 'schedule' && needs.checks.result || join(needs.*.result, ' ') }}");
+});
+
 it('runs every chained job on both Linux and Windows', function (): void {
     // `CI` needs each job by id, and a matrix job reports `success` only when
     // every leg succeeded, so the Windows leg is required exactly as long as

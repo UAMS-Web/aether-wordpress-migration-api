@@ -8,7 +8,7 @@ When `pcov-setup`'s state check exits 2 and it says to try a version-pinned bina
 
 ## What CI mutates
 
-The shared chain's `mutate` job runs `composer mutate` on a pull request or a push that changes `Pagination`, `Config` or `Auth`, and gates `CI` on the result (D-118). It mutates nothing on any other change. `mutate-paths` in [`ci.yml`](../.github/workflows/ci.yml) and the `--path` values in [`composer.json`](../composer.json) name the same files, and `CiParityTest` holds them together.
+The shared chain's `mutate` job runs `composer mutate` on a pull request or a push that changes `Pagination`, `Config` or `Auth`, and gates `CI` on the result (D-118). It mutates nothing on any other change. A weekly scheduled run and a manually dispatched run mutate all three (#135). `mutate-paths` in [`ci.yml`](../.github/workflows/ci.yml) and the `--path` values in [`composer.json`](../composer.json) name the same files, and `CiParityTest` holds them together.
 
 ## A hand-run pass takes the same shape as `composer mutate`
 
