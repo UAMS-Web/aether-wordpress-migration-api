@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The authentication boundary.
+ * Authentication boundary.
  */
 
 declare(strict_types=1);
