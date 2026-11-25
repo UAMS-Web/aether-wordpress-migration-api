@@ -250,6 +250,12 @@ final class Config
 
                 // A list read without a column would serve one empty string
                 // per row: a well-formed list of wrong values.
+                //
+                // Equivalent for BreakToContinue (#136): `acf_list` is the last
+                // source in the loop, so there is no later one for `continue`
+                // to reach. The annotation precedes the `if` because one on
+                // the `break` itself suppresses nothing.
+                // @pest-mutate-ignore:BreakToContinue
                 if ($source === 'acf_list' && $column === '') {
                     break;
                 }
