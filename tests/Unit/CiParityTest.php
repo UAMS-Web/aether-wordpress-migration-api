@@ -145,6 +145,32 @@ function ciCalledJobs(): array
 }
 
 /**
+ * The files `composer mutate` covers, in the order its commands name them.
+ *
+ * @return list<string>
+ */
+function ciMutatedFiles(): array
+{
+    $composer = json_decode((string) file_get_contents(\dirname(__DIR__, 2).'/composer.json'), true);
+    $scripts = \is_array($composer) ? ($composer['scripts'] ?? null) : null;
+    $commands = \is_array($scripts) ? ($scripts['mutate'] ?? null) : null;
+
+    $files = [];
+
+    foreach (\is_array($commands) ? $commands : [$commands] as $command) {
+        if (\is_string($command) && preg_match('/ --path=(\S+)/', $command, $path) === 1) {
+            array_push($files, ...explode(',', $path[1]));
+        }
+    }
+
+    if ($files === []) {
+        throw new RuntimeException('composer.json has no "mutate" script that names a --path.');
+    }
+
+    return $files;
+}
+
+/**
  * Local jobs the runner selects from the diff rather than on every run, each
  * because it reads only what its `paths` name and gates nothing.
  *
@@ -521,11 +547,16 @@ it('calls the shared chain at a release tag, on Linux and Windows, with its Pest
     $calledJobs = array_keys(ciCalledJobs());
     sort($calledJobs);
 
+    // A path the job selects and `composer mutate` does not cover would be
+    // scored on a changed file and left out of every full pass (D-118).
+    preg_match('/^      mutate-paths: (.+)$/m', $body, $paths);
+    $mutatePaths = explode(' ', trim($paths[1] ?? ''));
+
     expect($body)->toMatch('#^    uses: UAMS-Web/uams-ci-workflows/\.github/workflows/ci\.yml@'.preg_quote(ciCalledChainTag(), '#').'$#m')
         ->and($body)->toMatch('/^      pest: false$/m')
         ->and($body)->not->toMatch('/^      mutate:/m')
         ->and($body)->toMatch('/^      mutate-wordpress: true$/m')
-        ->and($body)->toMatch('/^      mutate-paths: includes$/m')
+        ->and($mutatePaths)->toBe(ciMutatedFiles())
         ->and($body)->not->toMatch('/^      (all-platform-jobs|linux-only|encoding-guard|vitest|vite-build|mutation-smoke):/m')
         ->and($body)->toMatch('/^      changed-tests: true$/m')
         ->and($windowsJobs)->toBe($calledJobs);

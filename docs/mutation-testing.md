@@ -6,6 +6,10 @@ The shared [`pcov-setup`](../.claude/skills/pcov-setup/SKILL.md) skill is the pr
 
 When `pcov-setup`'s state check exits 2 and it says to try a version-pinned binary, try `php84 -v` first. The gate resolves `php84` for every PHP job but one by construction: the shared local CI runner prefers Herd's version-pinned binary for the `php` that [`local-ci.json`](../local-ci.json) names, `8.4`, over the default PHP. (The `lint-floor` job names `8.2` and needs no coverage driver.) So a working `php84` keeps the gate available while the default build is investigated.
 
+## What CI mutates
+
+The shared chain's `mutate` job runs `composer mutate` on a pull request or a push that changes `Pagination`, `Config` or `Auth`, and gates `CI` on the result (D-118). It mutates nothing on any other change. `mutate-paths` in [`ci.yml`](../.github/workflows/ci.yml) and the `--path` values in [`composer.json`](../composer.json) name the same files, and `CiParityTest` holds them together.
+
 ## A hand-run pass takes the same shape as `composer mutate`
 
 `composer mutate` runs one pass per class from the Integration suite's own Composer setup (D-092), each `@php tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml --test-directory=. --mutate --covered-only --path=includes/<File>.php`, for `Pagination`, `Config` and `Auth` ([`composer.json`](../composer.json)). The mutate plugin and its patches live in that setup, not the root one, so a pass run by hand, for example under Herd's bundled Xdebug, uses the same binary and the same two options:

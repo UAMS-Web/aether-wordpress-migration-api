@@ -41,9 +41,11 @@ defaults:
 #     and no WordPress tree, and four of this repository's five Pest processes
 #     boot WordPress against MySQL. The `pest` job below stays.
 #
-# The `mutate` job (#141) runs `composer mutate` on the PHP files under
-# `includes/` that a pull request or a push changes, and passes with nothing to
-# mutate when there are none. `composer mutate` boots WordPress, so the call
+# The `mutate` job (#141, D-118) runs `composer mutate` on whichever of the
+# three files D-023 scopes it to a pull request or a push changes, and passes
+# with nothing to mutate when it changes none of them. Its result gates `CI`.
+# `mutate-paths` names those files and not `includes/`, where most classes have
+# recorded survivors. `composer mutate` boots WordPress, so the call
 # passes `mutate-wordpress: true`, which stands up MySQL, WordPress and the
 # Integration suite's Composer setup inside that job. It runs on Linux only,
 # whatever `windows-jobs` says, and `local-ci.json` has no counterpart for it.
@@ -458,7 +460,9 @@ jobs:
       # (#141). The suite chooses a network itself, and the WordPress version
       # and database image defaults match the `pest` job below.
       mutate-wordpress: true
-      mutate-paths: includes
+      # The three files D-023 scopes `composer mutate` to, not `includes/`. A
+      # class is added once a pass over it leaves no survivor (D-118).
+      mutate-paths: includes/Pagination.php includes/Config.php includes/Auth.php
       # The changed-tests report (#124). Only the unit suite runs without
       # WordPress; tests/Integration needs a WordPress install and a database the
       # called job cannot provide, and its files would be reported as not run.
