@@ -49,7 +49,8 @@ defaults:
 #
 # The `mutate` job (#141, D-118) runs `composer mutate` on whichever of the
 # three files D-023 scopes it to a pull request or a push changes, and passes
-# with nothing to mutate when it changes none of them. Its result gates `CI`.
+# with nothing to mutate when it changes none of them. A scheduled or manually
+# dispatched run mutates all three. Its result gates `CI`.
 # `mutate-paths` names those files and not `includes/`, where most classes have
 # recorded survivors. `composer mutate` boots WordPress, so the call
 # passes `mutate-wordpress: true`, which stands up MySQL, WordPress and the
@@ -160,7 +161,8 @@ defaults:
 # where it exists. The `CI` job itself runs once, on Linux.
 #
 # SCHEDULED RUNS (#135). The `schedule:` trigger runs on the default branch
-# only and starts the `checks` call and `CI`, nothing else. The plain jobs would
+# only, for the full mutation pass over the three files `mutate-paths` names,
+# and starts the `checks` call and `CI`, nothing else. The plain jobs would
 # repeat what the push to `main` already ran on the same commit, so
 # `load-guard`, the head of the chain, and `mutate-ignore-breadth`, the first
 # job after the call, are off on a schedule; the jobs after each of them are
