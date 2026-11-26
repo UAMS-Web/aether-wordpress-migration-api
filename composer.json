@@ -78,6 +78,10 @@
             "Composer\\Config::disableProcessTimeout",
             "@php tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml --test-directory=. --mutate --covered-only --path=includes/Pagination.php,includes/Config.php,includes/Auth.php"
         ],
+        "mutate:secret": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php scripts/mutate-secret-states.php"
+        ],
         "stan": "phpstan analyze --no-progress --memory-limit=2G",
         "refactor": "rector",
         "refactor:sweep": "rector --config=rector-sweep.php",
@@ -101,6 +105,7 @@
         "test:integration:single-site": "Run the suite that boots WordPress again on a single-site install. MULTISITE is a constant fixed for the process, so each install shape needs its own process.",
         "test:integration:single-site:secret": "Re-run the shared-secret tests on a single-site install, with UAMSWP_MIGRATION_API_SECRET defined.",
         "mutate": "Mutate, from the Integration setup, the three classes mutation can actually reach and require the suite to kill each mutant. Needs a coverage driver; takes minutes. See docs/DECISIONS.md D-023.",
+        "mutate:secret": "Mutate Auth.php once per shared-secret state (none, secret, empty, non-string) and require each mutant on the shared-secret lines to be killed in at least one. Needs the Integration setup and a coverage driver; takes minutes. See docs/DECISIONS.md D-119.",
         "stan": "Run PHPStan at level max.",
         "refactor": "Apply the gating Rector profile.",
         "refactor:sweep": "Apply every Rector rule, including judgment-call ones. Review the diff.",
