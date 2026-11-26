@@ -81,11 +81,26 @@ $secret = getenv('WP_TESTS_MIGRATION_SECRET');
  *       tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml \
  *       --test-directory=. tests/Integration/Feature/EmptySecretTest.php
  *
- * One `define()` serves all three states, so the analyzer sees the constant as
- * the string it is in production rather than as the literal one branch sets.
+ * One `define()` serves every state, so the analyzer sees the constant as the
+ * `int|string` it can be in production rather than as the literal one branch
+ * sets.
  */
 $emptySecret = getenv('UAMSWP_MIGRATION_API_TESTS_EMPTY_SECRET') === '1';
 
-if ($emptySecret || (is_string($secret) && $secret !== '')) {
-    define('UAMSWP_MIGRATION_API_SECRET', $emptySecret ? '' : $secret);
+/*
+ * `UAMSWP_MIGRATION_API_TESTS_NON_STRING_SECRET=1` defines the constant as the
+ * integer `1`, a fourth state: defined, not a string, and authorizing nothing
+ * (#138). `wp-config.php` can define it as anything, and `hash_equals()` raises
+ * a `TypeError` for a non-string, so `Auth::secretAccepts()` refuses it before
+ * comparing. Like the empty secret, it is for one invocation of
+ * `NonStringSecretTest.php`, never for `composer test` or the chain:
+ *
+ *     UAMSWP_MIGRATION_API_TESTS_NON_STRING_SECRET=1 \
+ *       tests/Integration/vendor/bin/pest --configuration=tests/Integration/phpunit.xml \
+ *       --test-directory=. tests/Integration/Feature/NonStringSecretTest.php
+ */
+$nonStringSecret = getenv('UAMSWP_MIGRATION_API_TESTS_NON_STRING_SECRET') === '1';
+
+if ($nonStringSecret || $emptySecret || (is_string($secret) && $secret !== '')) {
+    define('UAMSWP_MIGRATION_API_SECRET', $nonStringSecret ? 1 : ($emptySecret ? '' : $secret));
 }

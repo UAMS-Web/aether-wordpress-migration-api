@@ -171,10 +171,25 @@ final class Auth
         $expected = constant(self::SECRET_CONSTANT);
 
         // A non-string, empty, or unset constant must never authorize anything.
+        //
+        // Equivalent for EmptyStringToNotEmpty (#138): an empty constant that
+        // passes this guard is refused by the empty-header guard below or by
+        // `hash_equals('', $presented)`, which is false for any non-empty
+        // value. The non-string half is not equivalent: a non-string reaching
+        // `hash_equals()` raises a `TypeError`, and a test kills both of its
+        // mutants.
+        // @pest-mutate-ignore:EmptyStringToNotEmpty
         if (! \is_string($expected) || $expected === '') {
             return false;
         }
 
+        // Equivalent for both mutators named below (#138): `$expected` is a
+        // non-empty string here, so `hash_equals($expected, '')` is false and
+        // an empty header is refused with or without this guard. Kept so the
+        // comparison is never the only thing between an empty header and a
+        // `true`. One annotation precedes the `if` for the condition and its
+        // early return, as `tokenAccepts()`'s does (#133).
+        // @pest-mutate-ignore:EmptyStringToNotEmpty,RemoveEarlyReturn
         if ($presented === '') {
             return false;
         }

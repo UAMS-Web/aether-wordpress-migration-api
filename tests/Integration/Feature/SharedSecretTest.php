@@ -65,13 +65,14 @@ it('authorizes nothing when no secret is configured', function (): void {
 
 /*
  * A secret defined as `''` is a third process, `EmptySecretTest.php`'s (D-098),
- * and these skip there: an empty secret is not a configured one.
+ * and one defined as a non-string a fourth, `NonStringSecretTest.php`'s (#138).
+ * These skip in both: neither is a configured secret.
  */
 
 it('admits a request carrying the correct secret, with no WordPress user', function (): void {
     expect(requestWithSecret(configuredSecret())->get_status())->toBe(200);
 })->skip(
-    ! defined('UAMSWP_MIGRATION_API_SECRET') || constant('UAMSWP_MIGRATION_API_SECRET') === '',
+    ! defined('UAMSWP_MIGRATION_API_SECRET') || ! is_string(constant('UAMSWP_MIGRATION_API_SECRET')) || constant('UAMSWP_MIGRATION_API_SECRET') === '',
     'Runs in the process where a secret is configured.'
 );
 
@@ -86,6 +87,6 @@ it('refuses a wrong, empty or absent secret even when one is configured', functi
         ->and(requestWithSecret(substr($correct, 0, -1))->get_status())->toBe(401)
         ->and(requestWithSecret($correct.'x')->get_status())->toBe(401);
 })->skip(
-    ! defined('UAMSWP_MIGRATION_API_SECRET') || constant('UAMSWP_MIGRATION_API_SECRET') === '',
+    ! defined('UAMSWP_MIGRATION_API_SECRET') || ! is_string(constant('UAMSWP_MIGRATION_API_SECRET')) || constant('UAMSWP_MIGRATION_API_SECRET') === '',
     'Runs in the process where a secret is configured.'
 );
