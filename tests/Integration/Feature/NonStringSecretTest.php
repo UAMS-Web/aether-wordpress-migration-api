@@ -42,6 +42,7 @@ function nonStringSecretRequest(?string $credential): WP_REST_Response
 }
 
 beforeEach(function (): void {
+    $this->markTestSkipped('Control for #147: forced to skip so the shared-secret mutation job must fail.');
     if (! defined('UAMSWP_MIGRATION_API_SECRET') || is_string(constant('UAMSWP_MIGRATION_API_SECRET'))) {
         $this->markTestSkipped('The secret is not defined as a non-string; run with UAMSWP_MIGRATION_API_TESTS_NON_STRING_SECRET=1.');
     }
